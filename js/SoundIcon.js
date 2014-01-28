@@ -104,25 +104,20 @@ waveCircle.onFrame = function (event) {
 		pointSpeed[updatePoint] = 0;
 	}
 
-	var oldPointCounter = 0;
 	pointCounter = Math.floor(event.count) % res;
 
-	if(oldPointCounter !== pointCounter)
-	{
 		for(var i = 0; i < pointUpdate.length; ++i)
 		{
-			var freq = dancer.getFrequency(500);
+			var freq = 3.0/*dancer.getFrequency(500)*/;
 			var j = Math.PI*2*pointCounter/res;
 			//pointUpdate[i].x = pointUpdate[i].x + amp * wav[wavCount]*ii[i]*Math.cos(j);
 			//pointUpdate[i].y = pointUpdate[i].y + amp * wav[wavCount]*ii[i]*Math.sin(j);
-			pointUpdate[i].x = pointUpdate[i].x + amp * wav[wavCount]*50000*freq*Math.cos(j);
-			pointUpdate[i].y = pointUpdate[i].y + amp * wav[wavCount]*50000*freq*Math.sin(j);
+			pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
+			pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
 		}
-	}
 
 	wavCount = event.count % wav.length;
 
-	oldPointCounter = pointCounter;
 	
 	var delta = [];
 	var prevDelta = [];

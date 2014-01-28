@@ -9,29 +9,15 @@ var sounds = [];
 var html = "";
 var dragSrcEl = null;
 var canvas = document.getElementById("scope");
+var sounds_path = 'sounds/';
 
-var audio = new Audio();
-audio.src = 'sounds/90_col_legno_rico_c.m4a'
-
-var audio2 = new Audio();
-audio2.src = 'sounds/90_col_legno_rico_c.m4a'
-
-var dancer = new Dancer();
-var dancer2 = new Dancer();
-dancer.load(audio);
-dancer2.load(audio2);
-
-dancer.play(audio);
-
-//var manager = new Manager();
-
-//manager.createEntity("sounds/90_col_legno_rico_c.m4a", 100, 100);
+var audio_objects = {};
+var loaded_sounds = {};
 
 // Global vars
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
 $(canvas).attr('width', cw).attr('height', ch);
-
 
 var ctx = canvas.getContext("2d");
 
@@ -55,6 +41,12 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 			humanString = humanString.join(" ");
 			html += '<li id="' + key + '" draggable="true">'
 			+ humanString + '</li>';
+
+			var audio = new Audio();
+			audio.src = sounds_path + val;
+
+			audio_objects[key] = audio;
+
 		})
 	}).done(function () {
 		$("ul#modules").html(html);
@@ -71,10 +63,26 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 	});
 
 
+function startSound(src)
+{
+	if(loaded_sounds[src] !== undefined)
+	{
+		loaded_sounds[src].play();
+	}
+	else
+	{
+		var dancer = new Dancer();
+		dancer.load(audio_objects[src]);
+		dancer.play();
+		loaded_sounds[src] = dancer;
+	}
+}
+
 // Event handler for start of dragging modules
 function handleDragStart(e)
 {
 	dragSrcEl = this;
+	console.log(dragSrcEl.id);
 	/*console.log("handleDragStart: " + dragSrcEl.id);*/
 }
 
@@ -146,10 +154,10 @@ function handleDrop(e)
 	$(dragSrcEl).addClass("playing");
 
 	// Reference to placed symbol in paper
-	//manager.createEntity("", cx, cy);
+	var placed = placeWaveSymbol(cx, cy);
+	startSound(activeSoundId);
 
 	// Update object reference array
-	placed_symbols[activeSoundId] = placed;
 	sounds_playing[placed.id] = activeSoundId;
 	
 	// Initialize sound pan and play
