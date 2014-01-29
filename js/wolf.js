@@ -9,17 +9,39 @@ var sounds = [];
 var html = "";
 var dragSrcEl = null;
 var canvas = document.getElementById("scope");
-var sounds_path = 'sounds/';
+var full_path = 'http://0.0.0.0:8080/sqinf/'
+var sounds_path = full_path + 'sounds/';
 
-var audio_objects = {};
-var loaded_sounds = {};
+
+var audio_urls = [];
+var objects = {};
 
 // Global vars
+
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
-$(canvas).attr('width', cw).attr('height', ch);
+console.log(ch);	
+
+$(canvas).attr('width', cw);
+$(canvas).attr('height', ch);
 
 var ctx = canvas.getContext("2d");
+var a_ctx;
+
+// Initialize WebKit Audio
+function init()
+{
+	try
+	{
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        a_ctx = new AudioContext();
+	}
+    catch(e)
+    {
+        alert('Web Audio API is not supported in your browser');
+    }
+}
+init();
 
 // Holds key->value binding for soundManager id to corresponding symbol
 var placed_symbols = {};
@@ -29,8 +51,9 @@ var sounds_playing = {};
 
 paper.setup(canvas);
 
-ctx.fillStyle = "rgb(100, 100, 100)";
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+var module_pos = {};
+module_pos.cx = 35;
+module_pos.cy = 35;
 
 // Load sounds from JSON and create sound objects	var data = {};
 	$.getJSON('json/sounds.json', function (data) { 
@@ -39,16 +62,17 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 		{
 			var humanString = key.split('_');
 			humanString = humanString.join(" ");
-			html += '<li id="' + key + '" draggable="true">'
-			+ humanString + '</li>';
-
-			var audio = new Audio();
-			audio.src = sounds_path + val;
-
-			audio_objects[key] = audio;
-
+			
+			placeModuleSymbol(createModuleSymbol('rgb(255, 0, 0)'), module_pos.cx, module_pos.cy);
+			module_pos.cx += 60;
+			if(module_pos.cx > cw)
+			{
+				module_pos.cx = 35;
+				module_pos.cy += 60;
+			}
+			audio_urls[key] = val;
 		})
-	}).done(function () {
+	});/*.done(function () {
 		$("ul#modules").html(html);
 	
 		var mods = $("ul#modules li");
@@ -60,30 +84,71 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 		canvas.on('dragenter', handleDragEnter);
 		canvas.on('drop', handleDrop);
-	});
+	});*/
 
+function setupObject(cx, cy)
+{
+	// Reference to placed symbol in paper
+	// Add symbol to object object
+	var placed = placeWaveSymbol(cx, cy);
+	objects[placed._id] = {
+		paper : placed
+	};
+
+	loadSound(dragSrcEl.id, placed._id);
+
+	console.log("placed: ", placed);
+}
 
 function startSound(src)
 {
-	if(loaded_sounds[src] !== undefined)
-	{
-		loaded_sounds[src].play();
-	}
-	else
-	{
-		var dancer = new Dancer();
-		dancer.load(audio_objects[src]);
-		dancer.play();
-		loaded_sounds[src] = dancer;
-	}
+
+}
+
+function loadSound(handle, paper_id)
+{
+	var url = sounds_path + audio_urls[handle];
+
+	var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    
+    request.onload = function () {
+        a_ctx.decodeAudioData(request.response, function (buffer) { 
+        	objects[paper_id].buffer = buffer; 
+        }, errorLoadingSound(url))
+    };
+
+    request.onreadystatechange = function () {
+    	
+    };
+
+    request.send();
+}
+
+function errorLoadingSound(sound)
+{
+	console.log("Error loading sound " + sound);
 }
 
 // Event handler for start of dragging modules
 function handleDragStart(e)
 {
 	dragSrcEl = this;
-	console.log(dragSrcEl.id);
-	/*console.log("handleDragStart: " + dragSrcEl.id);*/
+
+	var handle = dragSrcEl.id;
+	console.log(dragSrcEl);
+	var cx = e.originalEvent.clientX - canvas.offsetLeft;
+	var cy = e.originalEvent.clientY - canvas.offsetTop;
+
+	if (e.stopPropagation)
+	{
+		e.stopPropagation();
+	}
+
+	
+	setupObject(cx, cy);
+	console.log("he");
 }
 
 // Prevent default events, so we can drop it
@@ -134,35 +199,13 @@ function getSoundId(paper_id)
 
 function changePan(id, pan)
 {
-	//var sound = soundManager.getSoundById(id);
-	//sound.setPan(pan);
+
 }
 
 function handleDrop(e)
 {
-	var activeSoundId = dragSrcEl.id;
-	console.log(dragSrcEl);
-	//var activeSound = soundManager.getSoundById(activeSoundId);
-	var cx = e.originalEvent.clientX - canvas.offsetLeft;
-	var cy = e.originalEvent.clientY - canvas.offsetTop;
-
-	if (e.stopPropagation)
-	{
-		e.stopPropagation();
-	}
 
 	$(dragSrcEl).addClass("playing");
-
-	// Reference to placed symbol in paper
-	var placed = placeWaveSymbol(cx, cy);
-	startSound(activeSoundId);
-
-	// Update object reference array
-	sounds_playing[placed.id] = activeSoundId;
-	
-	// Initialize sound pan and play
-	//soundManager.setPan(activeSoundId, getPan(cx));
-	//activeSound.play();
 
 	return false;
 }

@@ -20,7 +20,20 @@ var peakMeter = new paper.Path({
 	strokeWidth: 5
 });
 
-var g_r = 40;
+function createModuleSymbol(moduleColor)
+{
+	var modulePath = new paper.Path.Circle({
+		center: [0, 0],
+		radius: 25,
+		strokeWidth : 0,
+		fillColor: moduleColor
+	});
+
+	var moduleSymbol = new paper.Symbol(modulePath);
+
+	return moduleSymbol;
+}
+var g_r = 10;
 var res = 32;
 var speed = 2;
 var amp = 10;
@@ -55,13 +68,13 @@ peakMeter.add(new paper.Point(0, 100));
 peakMeter.add(new paper.Point(0, 0));
 
 var peakMeterSymbol = new paper.Symbol(peakMeter);
-peakMeterSymbol.place(new paper.Point(400, 200));
+//peakMeterSymbol.place(new paper.Point(400, 200));
 
 var waveCircleSymbol = new paper.Symbol(waveCircle);
-waveCircleSymbol.place(new paper.Point(250, 250));
+//waveCircleSymbol.place(new paper.Point(250, 250));
 
 var waveCircleInitSymbol = new paper.Symbol(waveCircleInit);
-waveCircleInitSymbol.place(new paper.Point(250, 250));
+//waveCircleInitSymbol.place(new paper.Point(250, 250));
 
 var pointCounter = 0;
 
@@ -108,12 +121,12 @@ waveCircle.onFrame = function (event) {
 
 		for(var i = 0; i < pointUpdate.length; ++i)
 		{
-			var freq = 3.0/*dancer.getFrequency(500)*/;
+			var freq = 10.0/*dancer.getFrequency(500)*/;
 			var j = Math.PI*2*pointCounter/res;
-			//pointUpdate[i].x = pointUpdate[i].x + amp * wav[wavCount]*ii[i]*Math.cos(j);
-			//pointUpdate[i].y = pointUpdate[i].y + amp * wav[wavCount]*ii[i]*Math.sin(j);
-			pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
-			pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
+			pointUpdate[i].x = pointUpdate[i].x + freq * ii[i] * Math.cos(j);
+			pointUpdate[i].y = pointUpdate[i].y + freq * ii[i] * Math.sin(j);
+			//pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
+			//pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
 		}
 
 	wavCount = event.count % wav.length;
@@ -196,25 +209,42 @@ var pushedElement = null;
 
 var mouseDown = function (e) {
 	pushedElement = e.target;
-	//console.log(e.target);
 };
 
-var mouseMove = function (e) {
+var mouseDrag = function (e) {
 
 	if(pushedElement !== null)
 	{
-		var cx = e.clientX - canvas.offsetLeft;
-		var cy = e.clientY - canvas.offsetTop;
-		pushedElement.position = new paper.Point(cx, cy);
-
+		console.log(e);
+		pushedElement.position = e.point;
+		console.log(e.lastPoint);
 		var paper_id = pushedElement.id;
 		var sm_id = getSoundId(paper_id);
-		changePan(sm_id, getPan(cx));
+		//changePan(sm_id, getPan(cx));
 	}
+};
 
+var mouseDownModule = function (e) {
+	pushedElement = e.target;
+	if(pushedElement !== null)
+	{
+		placeModuleSymbol(pushedElement.symbol, pushedElement.position.x, pushedElement.position.y);
+		console.log(e);
+		pushedElement.position = e.point;
+		console.log(e.lastPoint);
+		var paper_id = pushedElement.id;
+		var sm_id = getSoundId(paper_id);
+		//changePan(sm_id, getPan(cx));
+	}
 };
 
 var mouseUp = function () {
+	pushedElement = null;
+};
+
+var mouseUpModule = function () {
+	placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
+	pushedElement.remove();
 	pushedElement = null;
 };
 
@@ -226,7 +256,16 @@ function placeWaveSymbol(x, y)
 {
 	var placed = waveCircleSymbol.place(new paper.Point(x, y));
 	placed.onMouseDown = mouseDown;
-	$(document).on('mousemove', mouseMove);
+	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
+	return placed;
+}
+
+function placeModuleSymbol(moduleSymbol, x, y)
+{
+	var placed = moduleSymbol.place(new paper.Point(x, y));
+	placed.onMouseDown = mouseDownModule;
+	placed.onMouseDrag = mouseDrag;
+	placed.onMouseUp = mouseUpModule;
 	return placed;
 }

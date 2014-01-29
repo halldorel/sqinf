@@ -16,7 +16,7 @@
 /* Layout */
 body
 {
-	background: #555;
+	background: #eee;
 	margin: 0px;
 	padding: 0px;
 	font-size: 10px;
@@ -28,6 +28,8 @@ body
 
 ul#modules
 {
+	position: absolute;
+	top: 0px;
 	list-style: none;
 	margin: 0px;
 	padding: 0px;
