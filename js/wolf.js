@@ -9,11 +9,13 @@ var sounds = [];
 var html = "";
 var dragSrcEl = null;
 var canvas = document.getElementById("scope");
-var full_path = 'http://0.0.0.0:8080/sqinf/'
-var sounds_path = full_path + 'sounds/';
+var full_path = '/sqinf/'
+var sounds_path = full_path + 'sounds/mp3/';
 
+// Modules available to play
+var modules = {};
 
-var audio_urls = [];
+// Modules currently playing
 var objects = {};
 
 // Global vars
@@ -41,50 +43,41 @@ function init()
         alert('Web Audio API is not supported in your browser');
     }
 }
+
 init();
 
-// Holds key->value binding for soundManager id to corresponding symbol
-var placed_symbols = {};
-
-// Holds key->value binding for symbol id to corresponding soundManager id
-var sounds_playing = {};
-
+// Setup Paper.js
 paper.setup(canvas);
 
+// Positional data for ordering modules
 var module_pos = {};
 module_pos.cx = 35;
 module_pos.cy = 35;
 
-// Load sounds from JSON and create sound objects	var data = {};
-	$.getJSON('json/sounds.json', function (data) { 
-	
-		$.each(data, function (key, val)
+// Load modules from JSON and draw the modules
+$(document).ready(function() {
+	$.each(files, function (key, val)
+	{
+		var humanString = key.split('_');
+		humanString = humanString.join(" ");
+		
+		var placed = placeModuleSymbol(createModuleSymbol('rgb(255, 0, 0)'), module_pos.cx, module_pos.cy);
+		
+		module_pos.cx += 60;
+
+		if(module_pos.cx > cw)
 		{
-			var humanString = key.split('_');
-			humanString = humanString.join(" ");
-			
-			placeModuleSymbol(createModuleSymbol('rgb(255, 0, 0)'), module_pos.cx, module_pos.cy);
-			module_pos.cx += 60;
-			if(module_pos.cx > cw)
-			{
-				module_pos.cx = 35;
-				module_pos.cy += 60;
-			}
-			audio_urls[key] = val;
-		})
-	});/*.done(function () {
-		$("ul#modules").html(html);
-	
-		var mods = $("ul#modules li");
-		var canvas = $("div#canvas-wrap");
+			module_pos.cx = 35;
+			module_pos.cy += 60;
+		}
 
-		mods.on('dragstart', handleDragStart);
-		canvas.on('dragover',  handleDragOver);
-		canvas.on('dragleave', handleDragLeave);
+		modules[placed.id] = {
+			paper: placed,
+			src: val
+		};
+	});
+});
 
-		canvas.on('dragenter', handleDragEnter);
-		canvas.on('drop', handleDrop);
-	});*/
 
 function setupObject(cx, cy)
 {
@@ -105,90 +98,79 @@ function startSound(src)
 
 }
 
-function loadSound(handle, paper_id)
+function loadSound(paper_id, instance_id)
 {
-	var url = sounds_path + audio_urls[handle];
+	var url = sounds_path + modules[paper_id].src;
 
 	var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
     
+	console.log(a_ctx);
+
     request.onload = function () {
-        a_ctx.decodeAudioData(request.response, function (buffer) { 
-        	objects[paper_id].buffer = buffer; 
-        }, errorLoadingSound(url))
+        a_ctx.decodeAudioData(request.response, function (buffer) {
+        	var sound;
+
+        	sound = {
+        		buffer: null
+        	};
+
+			sound.convolver = a_ctx.createConvolver();
+        	sound.analyser = a_ctx.createAnalyser();
+        	sound.panner = a_ctx.createPanner();
+
+        	sound.analyser.fftSize = 2048;
+        	sound.analyser.smoothingTimeConstant = 0.1;
+
+        	if(sound.buffer == null)
+	        {
+	        	sound.buffer = buffer;
+	        }
+
+			sound.source = a_ctx.createBufferSource();
+    		sound.source.buffer = sound.buffer;
+	        //sound.fftdata = new Uint8Array(sound.source.buffer);
+	        //fft.getByteFrequencyData(sound.data);
+    		sound.source.connect(sound.panner);
+    		sound.convolver.connect(sound.analyser);
+    		sound.analyser.connect(sound.panner);
+    		sound.panner.setPosition(0, 0, 0);
+
+    		sound.panner.connect(a_ctx.destination);
+    		sound.source.start(0);
+
+    		objects[instance_id] = sound;
+
+        }, onError);
     };
 
     request.onreadystatechange = function () {
-    	
+    	if(request.readyState == 4)
+    	{
+    		objects[instance_id].readyToRumble = true;
+    	}
     };
 
     request.send();
 }
 
-function errorLoadingSound(sound)
+function onError()
 {
-	console.log("Error loading sound " + sound);
-}
-
-// Event handler for start of dragging modules
-function handleDragStart(e)
-{
-	dragSrcEl = this;
-
-	var handle = dragSrcEl.id;
-	console.log(dragSrcEl);
-	var cx = e.originalEvent.clientX - canvas.offsetLeft;
-	var cy = e.originalEvent.clientY - canvas.offsetTop;
-
-	if (e.stopPropagation)
-	{
-		e.stopPropagation();
-	}
-
-	
-	setupObject(cx, cy);
-	console.log("he");
-}
-
-// Prevent default events, so we can drop it
-function handleDragOver(e)
-{
-	if(e.preventDefault) 
-	{
-		e.preventDefault();
-	}
-
-	return false;
-}
-
-function handleDragEnter(e)
-{
-
-}
-
-function handleDragLeave(e)
-{
-
+	console.log("Error loading sound ");
 }
 
 function removeSound(id)
 {
 	// Remove the image
-	placed_symbols[id].remove();
-
-	// Remove from objects
-	var paper_id = placed_symbols[id].id;
-
-	delete placed_symbols.paper_id;
-	delete sounds_playing.id
+	objects[id].paper.remove();
 }
 
 function getPan(xpos)
 {
-	var width = canvas.width;
+	var width = cw;
 	var temp = ((2 * xpos) - width) / width;
-	var pan = temp * 100;
+	var pan = temp * 5;
 	return pan;
 }
 
@@ -201,15 +183,3 @@ function changePan(id, pan)
 {
 
 }
-
-function handleDrop(e)
-{
-
-	$(dragSrcEl).addClass("playing");
-
-	return false;
-}
-
-$(document).ready(function (){
-
-});

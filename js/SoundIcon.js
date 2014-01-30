@@ -33,12 +33,12 @@ function createModuleSymbol(moduleColor)
 
 	return moduleSymbol;
 }
-var g_r = 10;
+
+var g_r = 40;
 var res = 32;
 var speed = 2;
 var amp = 10;
 var pointAccel = 0.10;
-
 
 // Init wave circle
 for(var i = 0; i < res; ++i)
@@ -130,7 +130,6 @@ waveCircle.onFrame = function (event) {
 		}
 
 	wavCount = event.count % wav.length;
-
 	
 	var delta = [];
 	var prevDelta = [];
@@ -167,8 +166,8 @@ waveCircle.onFrame = function (event) {
 	}
 
 waveCircle.smooth();
-}
 
+}
 
 var length = 40;
 
@@ -212,30 +211,31 @@ var mouseDown = function (e) {
 };
 
 var mouseDrag = function (e) {
-
 	if(pushedElement !== null)
 	{
-		console.log(e);
+		var obj = objects[pushedElement.id]
 		pushedElement.position = e.point;
-		console.log(e.lastPoint);
-		var paper_id = pushedElement.id;
-		var sm_id = getSoundId(paper_id);
-		//changePan(sm_id, getPan(cx));
+		if(obj !== undefined || obj !== null)
+			obj.panner.setPosition(getPan(e.point.x), getPan(e.point.y), 0);
+
+		console.log(getPan(e.point.x));
 	}
+
+
 };
 
 var mouseDownModule = function (e) {
+	// Start preloading audio
+
+	var paper_id = e.target.id;
 	pushedElement = e.target;
+
 	if(pushedElement !== null)
 	{
-		placeModuleSymbol(pushedElement.symbol, pushedElement.position.x, pushedElement.position.y);
-		console.log(e);
-		pushedElement.position = e.point;
-		console.log(e.lastPoint);
-		var paper_id = pushedElement.id;
-		var sm_id = getSoundId(paper_id);
-		//changePan(sm_id, getPan(cx));
+		pushedElement = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
 	}
+
+	loadSound(paper_id, pushedElement.id);
 };
 
 var mouseUp = function () {
@@ -243,7 +243,7 @@ var mouseUp = function () {
 };
 
 var mouseUpModule = function () {
-	placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
+	var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
 	pushedElement.remove();
 	pushedElement = null;
 };
