@@ -22,6 +22,14 @@ var objects = {};
 
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
+
+window.onresize = function () {
+var cw = document.body.clientWidth;
+var ch = document.body.clientHeight;
+	$(canvas).attr('width', cw);
+	$(canvas).attr('height', ch);
+};
+
 console.log(ch);	
 
 $(canvas).attr('width', cw);
@@ -100,59 +108,66 @@ function startSound(src)
 
 function loadSound(paper_id, instance_id)
 {
-	var url = sounds_path + modules[paper_id].src;
-
-	var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.responseType = 'arraybuffer';
-    
-	console.log(a_ctx);
-
-    request.onload = function () {
-        a_ctx.decodeAudioData(request.response, function (buffer) {
-        	var sound;
-
-        	sound = {
-        		buffer: null
-        	};
-
-			sound.convolver = a_ctx.createConvolver();
-        	sound.analyser = a_ctx.createAnalyser();
-        	sound.panner = a_ctx.createPanner();
-
-        	sound.analyser.fftSize = 2048;
-        	sound.analyser.smoothingTimeConstant = 0.1;
-
-        	if(sound.buffer == null)
-	        {
-	        	sound.buffer = buffer;
-	        }
-
-			sound.source = a_ctx.createBufferSource();
-    		sound.source.buffer = sound.buffer;
-	        //sound.fftdata = new Uint8Array(sound.source.buffer);
-	        //fft.getByteFrequencyData(sound.data);
-    		sound.source.connect(sound.panner);
-    		sound.convolver.connect(sound.analyser);
-    		sound.analyser.connect(sound.panner);
-    		sound.panner.setPosition(0, 0, 0);
-
-    		sound.panner.connect(a_ctx.destination);
-    		sound.source.start(0);
-
-    		objects[instance_id] = sound;
-
-        }, onError);
-    };
-
-    request.onreadystatechange = function () {
-    	if(request.readyState == 4)
-    	{
-    		objects[instance_id].readyToRumble = true;
-    	}
-    };
-
-    request.send();
+	// Check if sound exists in buffer
+	if(objects[paper_id] === undefined)
+	{
+		var url = sounds_path + modules[paper_id].src;
+	
+		var request = new XMLHttpRequest();
+    	request.open('GET', url, true);
+    	request.responseType = 'arraybuffer';
+    	
+		console.log(a_ctx);
+	
+    	request.onload = function () {
+    	    a_ctx.decodeAudioData(request.response, function (buffer) {
+    	    	var sound;
+	
+    	    	sound = {
+    	    		buffer: null
+    	    	};
+	
+				sound.convolver = a_ctx.createConvolver();
+    	    	sound.analyser = a_ctx.createAnalyser();
+    	    	sound.panner = a_ctx.createPanner();
+	
+    	    	sound.analyser.fftSize = 2048;
+    	    	sound.analyser.smoothingTimeConstant = 0.1;
+	
+    	    	if(sound.buffer == null)
+		        {
+		        	sound.buffer = buffer;
+		        }
+	
+				sound.source = a_ctx.createBufferSource();
+    			sound.source.buffer = sound.buffer;
+		        //sound.fftdata = new Uint8Array(sound.source.buffer);
+		        //fft.getByteFrequencyData(sound.data);
+    			sound.source.connect(sound.panner);
+    			sound.convolver.connect(sound.analyser);
+    			sound.analyser.connect(sound.panner);
+    			sound.panner.setPosition(0, 0, 0);
+	
+    			sound.panner.connect(a_ctx.destination);
+    			sound.source.start(0);
+	
+    			objects[instance_id] = sound;
+	
+    	    }, onError);
+    	};
+	
+    	request.onreadystatechange = function () {
+    		if(request.readyState == 4)
+    		{
+    		}
+    	};
+	
+    	request.send();
+    }
+    else
+    {
+    	//objects[]
+    }
 }
 
 function onError()
@@ -169,9 +184,24 @@ function removeSound(id)
 function getPan(xpos)
 {
 	var width = cw;
+	var sign = 1;
 	var temp = ((2 * xpos) - width) / width;
-	var pan = temp * 5;
-	return pan;
+	var pan = temp * 10;
+	if (pan < 0){
+		pan -= 1;
+		sign = -1;
+	} 
+	else
+	{
+		pan += 1;
+	}
+	console.log(sign * log10(Math.abs(pan)));
+	return sign * log10(Math.abs(pan));
+}
+
+function log10(n)
+{
+	return Math.log(n)/Math.log(10);
 }
 
 function getSoundId(paper_id)

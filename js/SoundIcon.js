@@ -211,17 +211,7 @@ var mouseDown = function (e) {
 };
 
 var mouseDrag = function (e) {
-	if(pushedElement !== null)
-	{
-		var obj = objects[pushedElement.id]
-		pushedElement.position = e.point;
-		if(obj !== undefined || obj !== null)
-			obj.panner.setPosition(getPan(e.point.x), getPan(e.point.y), 0);
-
-		console.log(getPan(e.point.x));
-	}
-
-
+	setActiveObjectPan(e);
 };
 
 var mouseDownModule = function (e) {
@@ -238,9 +228,23 @@ var mouseDownModule = function (e) {
 	loadSound(paper_id, pushedElement.id);
 };
 
-var mouseUp = function () {
+var mouseUp = function (e) {
+	setActiveObjectPan(e);
 	pushedElement = null;
 };
+
+function setActiveObjectPan(e) 
+{
+	if(pushedElement !== null)
+	{
+		var obj = objects[pushedElement.id];
+		pushedElement.position = e.point;
+		if(obj !== undefined)
+		{
+			obj.panner.setPosition(getPan(e.point.x), /*getPan(e.point.y)*/ 1, 1);
+		}
+	}
+}
 
 var mouseUpModule = function () {
 	var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
