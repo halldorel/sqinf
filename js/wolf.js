@@ -131,8 +131,11 @@ function loadSound(paper_id, instance_id)
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 	
-    	    	sound.analyser.fftSize = 2048;
+    	    	sound.analyser.fftSize = 128;
     	    	sound.analyser.smoothingTimeConstant = 0.1;
+
+
+    	    	console.log("Analyser:", sound.analyser);
 	
     	    	if(sound.buffer == null)
 		        {
@@ -141,8 +144,6 @@ function loadSound(paper_id, instance_id)
 	
 				sound.source = a_ctx.createBufferSource();
     			sound.source.buffer = sound.buffer;
-		        //sound.fftdata = new Uint8Array(sound.source.buffer);
-		        //fft.getByteFrequencyData(sound.data);
     			sound.source.connect(sound.panner);
     			sound.convolver.connect(sound.analyser);
     			sound.analyser.connect(sound.panner);
@@ -150,6 +151,9 @@ function loadSound(paper_id, instance_id)
 	
     			sound.panner.connect(a_ctx.destination);
     			sound.source.start(0);
+
+		        sound.fftdata = new Uint8Array(sound.analyser.frequencyBinCount);
+		        //sound.analyser.getByteFrequencyData(sound.fftdata);
 	
     			objects[instance_id] = sound;
 	
@@ -187,16 +191,7 @@ function getPan(xpos)
 	var sign = 1;
 	var temp = ((2 * xpos) - width) / width;
 	var pan = temp * 10;
-	if (pan < 0){
-		pan -= 1;
-		sign = -1;
-	} 
-	else
-	{
-		pan += 1;
-	}
-	console.log(sign * log10(Math.abs(pan)));
-	return sign * log10(Math.abs(pan));
+	return pan;
 }
 
 function log10(n)
@@ -211,5 +206,9 @@ function getSoundId(paper_id)
 
 function changePan(id, pan)
 {
-
+	var obj = objects[id];
+	if(obj !== undefined)
+	{
+		obj.panner.setPosition(pan.x, 0, 2);
+	}
 }

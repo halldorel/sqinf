@@ -105,6 +105,7 @@ for(var i = 0; i < res; ++i)
 {
 	pointSpeed[i] = 0;
 }
+var echo = true;
 
 waveCircle.onFrame = function (event) {
 
@@ -119,15 +120,21 @@ waveCircle.onFrame = function (event) {
 
 	pointCounter = Math.floor(event.count) % res;
 
-		for(var i = 0; i < pointUpdate.length; ++i)
-		{
-			var freq = 10.0/*dancer.getFrequency(500)*/;
-			var j = Math.PI*2*pointCounter/res;
-			pointUpdate[i].x = pointUpdate[i].x + freq * ii[i] * Math.cos(j);
-			pointUpdate[i].y = pointUpdate[i].y + freq * ii[i] * Math.sin(j);
-			//pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
-			//pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
-		}
+	var arr = new Uint8Array();
+ 	//console.log(objects[this.id].analyser.getByteFrequencyData(arr));
+ 	//console.log(arr);
+
+ 	//console.log(this);
+
+	for(var i = 0; i < pointUpdate.length; ++i)
+	{
+		var freq = 10.0/*dancer.getFrequency(500)*/;
+		var j = Math.PI*2*pointCounter/res;
+		pointUpdate[i].x = pointUpdate[i].x + freq * ii[i] * Math.cos(j);
+		pointUpdate[i].y = pointUpdate[i].y + freq * ii[i] * Math.sin(j);
+		//pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
+		//pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
+	}
 
 	wavCount = event.count % wav.length;
 	
@@ -211,7 +218,13 @@ var mouseDown = function (e) {
 };
 
 var mouseDrag = function (e) {
-	setActiveObjectPan(e);
+	if(pushedElement !== null)
+	{
+		pushedElement.position = e.point;
+//		console.log(pushedElement)
+//		pushedElement.scale(1 + e.point.y/(100*ch));
+		setActiveObjectPan(e);
+	}
 };
 
 var mouseDownModule = function (e) {
@@ -237,12 +250,7 @@ function setActiveObjectPan(e)
 {
 	if(pushedElement !== null)
 	{
-		var obj = objects[pushedElement.id];
-		pushedElement.position = e.point;
-		if(obj !== undefined)
-		{
-			obj.panner.setPosition(getPan(e.point.x), /*getPan(e.point.y)*/ 1, 1);
-		}
+		changePan(pushedElement.id, {x: getPan(e.point.x)});
 	}
 }
 
@@ -256,9 +264,10 @@ function waveFunc (x) {
 	return (40 + (20 * Math.sin(x * 2 * Math.PI)));
 }
 
-function placeWaveSymbol(x, y)
+function placeWaveSymbol(x, y, scale)
 {
 	var placed = waveCircleSymbol.place(new paper.Point(x, y));
+	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
