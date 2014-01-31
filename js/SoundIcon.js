@@ -36,14 +36,14 @@ function createModuleSymbol(moduleColor)
 
 var g_r = 40;
 var res = 32;
-var speed = 2;
-var amp = 10;
-var pointAccel = 0.10;
+var speed = 5;
+var amp = 2;
+var pointAccelConst = 0.1;
 
 // Init wave circle
 for(var i = 0; i < res; ++i)
 {
-	var j = (2*i/res)*Math.PI;
+	var j = Math.PI*2*i/res;
 	
 	var x = g_r * Math.cos(j);
 	var y = g_r * Math.sin(j);
@@ -93,48 +93,37 @@ function smoothen(x)
 	return results;
 }
 
-var ii = smoothen(5);
+var ii = smoothen(11);
 
 peakMeter.onFrame = function (event) {
 	this.segments[1].point.y = -100*wav[wavCount];
 }
 
-var pointSpeed = [];
+var waveCircleOnFrame = function (event) {
 
-for(var i = 0; i < res; ++i)
-{
-	pointSpeed[i] = 0;
-}
-var echo = true;
+	var paper_id = this.id;
+	var obj = objects[paper_id];
 
-waveCircle.onFrame = function (event) {
+	if(obj.pointSpeed === undefined)
+	{
+		obj.pointSpeed = [];
+	}
+
+	obj.fftdata = new Uint8Array(obj.analyser.frequencyBinCount);
+	obj.analyser.getByteFrequencyData(obj.fftdata);
 
 	var pointUpdate = [];
 
-	for(var i = 0; i < ii.length; ++i)
-	{
-		var updatePoint = ((pointCounter + i)) % res;
-		pointUpdate[i] = this.segments[updatePoint].point;
-		pointSpeed[updatePoint] = 0;
-	}
-
+	
 	pointCounter = Math.floor(event.count) % res;
+	
+	var wavePoint = this.symbol.definition.segments[pointCounter].point;
 
-	var arr = new Uint8Array();
- 	//console.log(objects[this.id].analyser.getByteFrequencyData(arr));
- 	//console.log(arr);
+	var freq = obj.fftdata[0]/16;
+	var j = Math.PI*2*pointCounter/res;
 
- 	//console.log(this);
-
-	for(var i = 0; i < pointUpdate.length; ++i)
-	{
-		var freq = 10.0/*dancer.getFrequency(500)*/;
-		var j = Math.PI*2*pointCounter/res;
-		pointUpdate[i].x = pointUpdate[i].x + freq * ii[i] * Math.cos(j);
-		pointUpdate[i].y = pointUpdate[i].y + freq * ii[i] * Math.sin(j);
-		//pointUpdate[i].x = pointUpdate[i].x + freq * Math.cos(j);
-		//pointUpdate[i].y = pointUpdate[i].y + freq * Math.sin(j);
-	}
+	wavePoint.x = wavePoint.x + amp * freq /* ii[i]*/* Math.cos(j);
+	wavePoint.y = wavePoint.y + amp * freq /* ii[i]*/ * Math.sin(j);
 
 	wavCount = event.count % wav.length;
 	
@@ -144,75 +133,53 @@ waveCircle.onFrame = function (event) {
 	for (var i = 0; i < res; ++i)
 	{
 		var j = Math.PI*2*i/res;
-		var point = this.segments[i].point;
+		var point = this.symbol.definition.segments[i].point;
 
 		var initCircle = waveCircleInit.segments[i].point;
 
 		var initX = initCircle.x;
 		var initY = initCircle.y;
 
-		pointSpeed[i] += pointAccel;
+		obj.pointSpeed[i] += pointAccelConst;
 
 		var distSq = ((point.x * point.x) + (point.y*point.y));
-		delta[i] = distSq > g_r*g_r;
+		delta[i] = distSq;
 
-		if(/*!(delta[i] && prevDelta[i])*/ delta[i])
+		if(/*(delta[i] && !prevDelta[i])*/ delta[i] > g_r*g_r)
 		{
-			//pointSpeed[i] *= -1;
+			//bounceEnable[i] = true;
+			point.x -= Math.cos(j) * obj.pointSpeed[i];
+			point.y -= Math.sin(j) * obj.pointSpeed[i];
+		}
+		/*else if((delta[i] < g_r*g_r) && (delta[i] > ((g_r*g_r)/2)))
+		{
 			point.x -= Math.cos(j) * pointSpeed[i];
 			point.y -= Math.sin(j) * pointSpeed[i];
-		}
+		}*/
+		/*else if((delta[i] > ((g_r*g_r)/4)) && (delta[i] <= ((g_r*g_r)/2)))
+		{
+		
+
+			point.x -= Math.cos(j) * pointSpeed[i];
+			point.y -= Math.sin(j) * pointSpeed[i];
+		}*/
 		else
 		{
 			point.x = initX;
 			point.y = initY;
-			pointSpeed[i] = 0;
+			obj.pointSpeed[i] = 0;
 		}
 	
 		prevDelta[i] = delta[i];
 	}
 
-waveCircle.smooth();
+	this.symbol.definition.smooth();
 
 }
 
-var length = 40;
-
-// Initialize waveform
-for(var i = 0; i <= length; ++i)
-{
-	var ratio = i/length;
-	var x = ratio * 80;
-	var y = 0;
-	wave.add(new paper.Point(x, y));
-}
-
-var box = new paper.Rectangle(new paper.Point(0, 0), new paper.Size(80, 80));
-var boxBack = new paper.Rectangle(new paper.Point(0, 0), new paper.Size(80, 80));
-var boxPath = new paper.Path.Rectangle(box, new paper.Size(10, 10));
-var boxBackPath = new paper.Path.Rectangle(boxBack, new paper.Size(10, 10));
-
-boxBackPath.fillColor = 'rgb(255, 255, 255)';
-boxBackPath.opacity = 0.0;
-
-boxPath.strokeColor = [0.8];
-boxPath.strokeWidth = 8;
-
-var group = new paper.Group([wave, boxPath, boxBackPath]);
-var symbol = new paper.Symbol(group);
-
-wave.onFrame = function(event) {
-	for(var i = 0; i <= length; ++i)
-	{
-		var sinus = Math.sin(event.time*4 + 8*i/length);
-
-		var point = this.segments[i].point;
-		point.y = 0 + sinus * 20;
-	}
-};
+// Event listeners
 
 var pushedElement = null;
-
 var mouseDown = function (e) {
 	pushedElement = e.target;
 };
@@ -221,8 +188,7 @@ var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
 		pushedElement.position = e.point;
-//		console.log(pushedElement)
-//		pushedElement.scale(1 + e.point.y/(100*ch));
+		// Scaling here
 		setActiveObjectPan(e);
 	}
 };
@@ -260,17 +226,21 @@ var mouseUpModule = function () {
 	pushedElement = null;
 };
 
+// Helper functions
+
 function waveFunc (x) {
 	return (40 + (20 * Math.sin(x * 2 * Math.PI)));
 }
 
 function placeWaveSymbol(x, y, scale)
 {
-	var placed = waveCircleSymbol.place(new paper.Point(x, y));
+	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
+	console.log(placed);
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
+	placed.onFrame = waveCircleOnFrame;
 	return placed;
 }
 

@@ -144,17 +144,13 @@ function loadSound(paper_id, instance_id)
 	
 				sound.source = a_ctx.createBufferSource();
     			sound.source.buffer = sound.buffer;
-    			sound.source.connect(sound.panner);
-    			sound.convolver.connect(sound.analyser);
+    			sound.source.connect(sound.analyser);
     			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
 	
     			sound.panner.connect(a_ctx.destination);
     			sound.source.start(0);
 
-		        sound.fftdata = new Uint8Array(sound.analyser.frequencyBinCount);
-		        //sound.analyser.getByteFrequencyData(sound.fftdata);
-	
     			objects[instance_id] = sound;
 	
     	    }, onError);
