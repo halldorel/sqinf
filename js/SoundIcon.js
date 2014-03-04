@@ -20,6 +20,8 @@ var peakMeter = new paper.Path({
 	strokeWidth: 5
 });
 
+var updates = 0;
+
 function createModuleSymbol(moduleColor)
 {
 	var modulePath = new paper.Path.Circle({
@@ -35,10 +37,10 @@ function createModuleSymbol(moduleColor)
 }
 
 var g_r = 40;
-var res = 32;
-var speed = 5;
-var amp = 2;
-var pointAccelConst = 0.1;
+var res = 16;
+var speed = 8;
+var amp = 15.0;
+var pointAccelConst = 0.003;
 
 // Init wave circle
 for(var i = 0; i < res; ++i)
@@ -55,20 +57,6 @@ for(var i = 0; i < res; ++i)
 waveCircle.closed = true;
 waveCircle.smooth();
 waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
-
-// Init test waveform
-var wav = [];
-for(var i = 0; i < res; ++i)
-{
-	wav[i] = (Math.sin(1/i*62*Math.PI) + 1)/2;
-}
-
-// Init peak meter
-peakMeter.add(new paper.Point(0, 100));
-peakMeter.add(new paper.Point(0, 0));
-
-var peakMeterSymbol = new paper.Symbol(peakMeter);
-//peakMeterSymbol.place(new paper.Point(400, 200));
 
 var waveCircleSymbol = new paper.Symbol(waveCircle);
 //waveCircleSymbol.place(new paper.Point(250, 250));
@@ -95,73 +83,79 @@ function smoothen(x)
 
 var ii = smoothen(11);
 
-peakMeter.onFrame = function (event) {
-	this.segments[1].point.y = -100*wav[wavCount];
+wave.onFrame = function (event) {
+	for(var id in objects)
+	{
+		updateWaveCircle(event, objects[id].paper);
+	}
 }
 
-var waveCircleOnFrame = function (event) {
-
-	var paper_id = this.id;
+var updateWaveCircle = function (event, paper_obj) {
+	var paper_id = paper_obj.id;
 	var obj = objects[paper_id];
+	var sound_obj = objects[paper_id]["sound"];
+
+	if(obj === undefined || sound_obj === undefined)
+		return;
 
 	if(obj.pointSpeed === undefined)
 	{
 		obj.pointSpeed = [];
 	}
 
-	obj.fftdata = new Uint8Array(obj.analyser.frequencyBinCount);
-	obj.analyser.getByteFrequencyData(obj.fftdata);
+	obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
+	obj.sound.timedomain = new Uint8Array(obj.sound.analyser.frequencyBinCount);
+	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
+	obj.sound.analyser.getByteTimeDomainData(obj.sound.timedomain);
 
 	var pointUpdate = [];
 
-	
 	pointCounter = Math.floor(event.count) % res;
-	
-	var wavePoint = this.symbol.definition.segments[pointCounter].point;
 
-	var freq = obj.fftdata[0]/16;
-	var j = Math.PI*2*pointCounter/res;
+	var odd = event.count % 2;
 
-	wavePoint.x = wavePoint.x + amp * freq /* ii[i]*/* Math.cos(j);
-	wavePoint.y = wavePoint.y + amp * freq /* ii[i]*/ * Math.sin(j);
+	for(var i = 0; i < res; i++)
+	{
+		var wavePoint = paper_obj.symbol.definition.segments[i].point;
+		var	freq = sound_obj.fftdata[i];
+		var j = Math.PI*2*i/res;
+		wavePoint.x = wavePoint.x + amp * 0.001 * freq * Math.cos(j);
+		wavePoint.y = wavePoint.y + amp * 0.001 * freq * Math.sin(j);
+	}
 
-	wavCount = event.count % wav.length;
-	
 	var delta = [];
 	var prevDelta = [];
 
 	for (var i = 0; i < res; ++i)
 	{
 		var j = Math.PI*2*i/res;
-		var point = this.symbol.definition.segments[i].point;
+		var point = paper_obj.symbol.definition.segments[i].point;
 
 		var initCircle = waveCircleInit.segments[i].point;
 
 		var initX = initCircle.x;
 		var initY = initCircle.y;
 
-		obj.pointSpeed[i] += pointAccelConst;
 
-		var distSq = ((point.x * point.x) + (point.y*point.y));
+		var distSq = ((point.x * point.x) + (point.y * point.y));
 		delta[i] = distSq;
 
-		if(/*(delta[i] && !prevDelta[i])*/ delta[i] > g_r*g_r)
+		if(delta[i] > g_r*g_r)
 		{
-			//bounceEnable[i] = true;
-			point.x -= Math.cos(j) * obj.pointSpeed[i];
-			point.y -= Math.sin(j) * obj.pointSpeed[i];
+			obj.pointSpeed[i] += pointAccelConst;
+			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
+			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
+		}/*
+		else if(delta[i] <= g_r*g_r)
+		{
+			point.x += Math.cos(j) * obj.pointSpeed[i];
+			point.y += Math.sin(j) * obj.pointSpeed[i];
 		}
-		/*else if((delta[i] < g_r*g_r) && (delta[i] > ((g_r*g_r)/2)))
+		else if(delta[i] <= g_r*g_r && obj.pointSpeed[i] > -0.3)
 		{
-			point.x -= Math.cos(j) * pointSpeed[i];
-			point.y -= Math.sin(j) * pointSpeed[i];
-		}*/
-		/*else if((delta[i] > ((g_r*g_r)/4)) && (delta[i] <= ((g_r*g_r)/2)))
-		{
-		
-
-			point.x -= Math.cos(j) * pointSpeed[i];
-			point.y -= Math.sin(j) * pointSpeed[i];
+			obj.pointSpeed[i] -= pointAccelConst;
+			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
+			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
 		}*/
 		else
 		{
@@ -169,12 +163,10 @@ var waveCircleOnFrame = function (event) {
 			point.y = initY;
 			obj.pointSpeed[i] = 0;
 		}
-	
-		prevDelta[i] = delta[i];
 	}
 
-	this.symbol.definition.smooth();
-
+	//console.log(updates);
+	//paper_obj.symbol.definition.smooth();
 }
 
 // Event listeners
@@ -188,7 +180,7 @@ var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
 		pushedElement.position = e.point;
-		// Scaling here
+
 		setActiveObjectPan(e);
 	}
 };
@@ -216,12 +208,13 @@ function setActiveObjectPan(e)
 {
 	if(pushedElement !== null)
 	{
-		changePan(pushedElement.id, {x: getPan(e.point.x)});
+		changePan(pushedElement.id, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
 	}
 }
 
 var mouseUpModule = function () {
 	var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
+	console.log(placed);
 	pushedElement.remove();
 	pushedElement = null;
 };
@@ -235,12 +228,13 @@ function waveFunc (x) {
 function placeWaveSymbol(x, y, scale)
 {
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
-	console.log(placed);
+	objects[placed.id] = {};
+	objects[placed.id].paper = placed;
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
-	placed.onFrame = waveCircleOnFrame;
+	placed.onUpdate = updateWaveCircle;
 	return placed;
 }
 

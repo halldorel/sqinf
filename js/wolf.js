@@ -131,12 +131,9 @@ function loadSound(paper_id, instance_id)
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 	
-    	    	sound.analyser.fftSize = 128;
+    	    	sound.analyser.fftSize = 256;
     	    	sound.analyser.smoothingTimeConstant = 0.1;
 
-
-    	    	console.log("Analyser:", sound.analyser);
-	
     	    	if(sound.buffer == null)
 		        {
 		        	sound.buffer = buffer;
@@ -147,11 +144,10 @@ function loadSound(paper_id, instance_id)
     			sound.source.connect(sound.analyser);
     			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
-	
     			sound.panner.connect(a_ctx.destination);
     			sound.source.start(0);
 
-    			objects[instance_id] = sound;
+    			objects[instance_id].sound = sound;
 	
     	    }, onError);
     	};
@@ -166,7 +162,7 @@ function loadSound(paper_id, instance_id)
     }
     else
     {
-    	//objects[]
+    	console.log("yes:", objects[paper_id]);
     }
 }
 
@@ -181,11 +177,19 @@ function removeSound(id)
 	objects[id].paper.remove();
 }
 
-function getPan(xpos)
+function getXPan(xpos)
 {
 	var width = cw;
 	var sign = 1;
 	var temp = ((2 * xpos) - width) / width;
+	var pan = temp * 10;
+	return pan;
+}
+
+function getYPan(ypos)
+{
+	var height = ch;
+	var temp = 1-(ypos/height);
 	var pan = temp * 10;
 	return pan;
 }
@@ -203,8 +207,8 @@ function getSoundId(paper_id)
 function changePan(id, pan)
 {
 	var obj = objects[id];
-	if(obj !== undefined)
+	if(obj.sound !== undefined)
 	{
-		obj.panner.setPosition(pan.x, 0, 2);
+		obj.sound.panner.setPosition(pan.x/50, pan.y, Math.cos((pan.x/50)*Math.PI));
 	}
 }
