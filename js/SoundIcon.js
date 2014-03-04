@@ -59,10 +59,8 @@ waveCircle.smooth();
 waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
 
 var waveCircleSymbol = new paper.Symbol(waveCircle);
-//waveCircleSymbol.place(new paper.Point(250, 250));
 
 var waveCircleInitSymbol = new paper.Symbol(waveCircleInit);
-//waveCircleInitSymbol.place(new paper.Point(250, 250));
 
 var pointCounter = 0;
 
@@ -145,18 +143,7 @@ var updateWaveCircle = function (event, paper_obj) {
 			obj.pointSpeed[i] += pointAccelConst;
 			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
 			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
-		}/*
-		else if(delta[i] <= g_r*g_r)
-		{
-			point.x += Math.cos(j) * obj.pointSpeed[i];
-			point.y += Math.sin(j) * obj.pointSpeed[i];
 		}
-		else if(delta[i] <= g_r*g_r && obj.pointSpeed[i] > -0.3)
-		{
-			obj.pointSpeed[i] -= pointAccelConst;
-			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
-			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
-		}*/
 		else
 		{
 			point.x = initX;
@@ -164,9 +151,7 @@ var updateWaveCircle = function (event, paper_obj) {
 			obj.pointSpeed[i] = 0;
 		}
 	}
-
-	//console.log(updates);
-	//paper_obj.symbol.definition.smooth();
+	paper_obj.symbol.definition.smooth();
 }
 
 // Event listeners
@@ -180,7 +165,7 @@ var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
 		pushedElement.position = e.point;
-
+		setActiveObjectScale(e);
 		setActiveObjectPan(e);
 	}
 };
@@ -209,6 +194,14 @@ function setActiveObjectPan(e)
 	if(pushedElement !== null)
 	{
 		changePan(pushedElement.id, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
+	}
+}
+
+function setActiveObjectScale(e) 
+{
+	if(pushedElement !== null)
+	{
+		setScale(pushedElement.id, e.point.y);
 	}
 }
 
