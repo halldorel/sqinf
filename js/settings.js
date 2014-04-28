@@ -1,16 +1,22 @@
+var colors = {
+	"green" : "0, 255, 0",
+	"red"	: "255, 0, 0",
+	"blue"	: "0, 0, 255"
+}
+
 var files = [
 /* 40 BPM */
 	{
 		"name" 	: "Bouncing.mp3",
 		"speed" : 40,
-		"color"	: "",
+		"color"	: "green",
 		"amp"	: 20,
 		"accel" : 4
 	},
 	{
 		"name" 	: "Cello Portamento.mp3",
 		"speed" : 40,
-		"color"	: ""
+		"color"	: "red"
 	},
 	{
 		"name" 	: "Cello Reverse 1.mp3",
@@ -45,7 +51,7 @@ var files = [
 	{
 		"name" 	: "Distant Harmonics 1.mp3",
 		"speed" : 40,
-		"color"	: ""
+		"color"	: "green",
 	},
 	{
 		"name" 	: "Distant Harmonics 2.mp3",
@@ -60,7 +66,7 @@ var files = [
 	{
 		"name" 	: "Passing Trains.mp3",
 		"speed" : 40,
-		"color"	: ""
+		"color"	: "green",
 	},
 	{
 		"name" 	: "Slow Crescendo 1.mp3",
@@ -80,7 +86,7 @@ var files = [
 	{
 		"name" 	: "Slow Pizzicato 1.mp3",
 		"speed" : 40,
-		"color"	: ""
+		"color"	: "red",
 	},
 	{
 		"name" 	: "Slow Pizzicato 2.mp3",

@@ -149,7 +149,6 @@ var updateWaveCircle = function (event, paper_obj) {
 }
 
 // Event listeners
-
 var pushedElement = null;
 var mouseDown = function (e) {
 	pushedElement = e.target;
@@ -166,13 +165,12 @@ var mouseDrag = function (e) {
 
 var mouseDownModule = function (e) {
 	// Start preloading audio
-
 	var paper_id = e.target.id;
 	pushedElement = e.target;
 
 	if(pushedElement !== null)
 	{
-		pushedElement = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
+		pushedElement = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y, undefined, 'rgb(40, 120, 120)');
 	}
 
 	loadSound(paper_id, pushedElement.id);
@@ -181,6 +179,10 @@ var mouseDownModule = function (e) {
 var mouseUp = function (e) {
 	setActiveObjectPan(e);
 	pushedElement = null;
+};
+
+var doubleClick = function (e) {
+	toggleLoop(e);
 };
 
 function setActiveObjectPan(e) 
@@ -207,20 +209,22 @@ var mouseUpModule = function () {
 };
 
 // Helper functions
-
 function waveFunc (x) {
 	return (40 + (20 * Math.sin(x * 2 * Math.PI)));
 }
 
-function placeWaveSymbol(x, y, scale)
+function placeWaveSymbol(x, y, scale, color)
 {
+	color = color || 'rgb(120, 120, 120)';
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
+	placed.fillColor = color;
 	objects[placed.id] = {};
 	objects[placed.id].paper = placed;
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
+	placed.onDoubleClick = doubleClick;
 	placed.onUpdate = updateWaveCircle;
 	return placed;
 }

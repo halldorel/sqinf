@@ -30,14 +30,17 @@ var objects = {};
 
 // Global vars
 
-var cw = document.body.clientWidth;
-var ch = document.body.clientHeight;
+var windowPadding = 40;
+
+var cw = document.body.clientWidth - (2 * windowPadding);
+var ch = document.body.clientHeight - (2 * windowPadding);
 
 window.onresize = function () {
-var cw = document.body.clientWidth;
-var ch = document.body.clientHeight;
+	cw = document.body.clientWidth - (2 * windowPadding);
+	ch = document.body.clientHeight - (2 * windowPadding);
 	$(canvas).attr('width', cw);
 	$(canvas).attr('height', ch);
+	positionModules();
 };
 
 $(canvas).attr('width', cw);
@@ -66,31 +69,47 @@ init();
 paper.setup(canvas);
 
 // Positional data for ordering modules
-var module_pos = {};
-module_pos.cx = 35;
-module_pos.cy = 35;
 
 // Load modules from JSON and draw the modules
-$(document).ready(function() {
-	for(var i = 0; i < files.length; ++i)
-	{	
-		var placed = placeModuleSymbol(createModuleSymbol('rgb(255, 0, 0)'), module_pos.cx, module_pos.cy);
-		
+
+function positionModules()
+{
+	var module_pos = {};
+	
+	module_pos.cx = 35;
+	module_pos.cy = 35;
+
+	for(var i in modules)
+	{
+		modules[i].paper.position.x = module_pos.cx;
+		modules[i].paper.position.y = module_pos.cy;
 		module_pos.cx += 60;
 
-		if(module_pos.cx > cw)
+		if(module_pos.cx >= cw - 50)
 		{
 			module_pos.cx = 35;
 			module_pos.cy += 60;
 		}
+	}
+}
 
+$(document).ready(function() {
+	for(var i = 0; i < files.length; ++i)
+	{	
+		// Read module color if defined, else use gray
+		var moduleColor = (files[i]["color"] !== undefined) ?
+			'rgb(' + colors[files[i]["color"]] + ')' : 'rgb(120, 120, 120)';
+
+		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
+		
 		modules[placed.id] = {
 			paper: placed,
 			file_id: i
 		};
 	}
-});
 
+	positionModules();
+});
 
 function setupObject(cx, cy)
 {
@@ -181,8 +200,9 @@ function removeSound(id)
 
 }
 
-function toggleLoop(id)
+function toggleLoop(e)
 {
+	var id = e.target._id;
 	objects[id]["sound"]["source"].loop = !objects[id]["sound"]["source"].loop;
 	console.log("Set loop to " + objects[id]["sound"]["source"].loop + " for object with id " + id);
 }
@@ -225,6 +245,6 @@ function changePan(id, pan)
 	var obj = objects[id];
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(pan.x/50, pan.y, Math.cos((pan.x/50)*Math.PI));
+		obj.sound.panner.setPosition(pan.x/50, /*pan.y*/0, Math.cos((pan.x/50)*Math.PI));
 	}
 }
