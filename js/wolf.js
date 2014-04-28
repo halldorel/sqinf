@@ -9,8 +9,18 @@ var sounds = [];
 var html = "";
 var dragSrcEl = null;
 var canvas = document.getElementById("scope");
-var full_path = '/sqinf/'
-var sounds_path = full_path + 'sounds/mp3/';
+var full_path = ''
+var sounds_path = full_path + 'sounds';
+
+for (var i = 0; i < files.length; ++i)
+{
+	// Construct filename
+	files[i]["full_path"] = sounds_path
+	+ "/"
+	+ files[i]["speed"]
+	+ "BPM/"
+	+ files[i]["name"];
+}
 
 // Modules available to play
 var modules = {};
@@ -29,8 +39,6 @@ var ch = document.body.clientHeight;
 	$(canvas).attr('width', cw);
 	$(canvas).attr('height', ch);
 };
-
-console.log(ch);	
 
 $(canvas).attr('width', cw);
 $(canvas).attr('height', ch);
@@ -64,11 +72,8 @@ module_pos.cy = 35;
 
 // Load modules from JSON and draw the modules
 $(document).ready(function() {
-	$.each(files, function (key, val)
-	{
-		var humanString = key.split('_');
-		humanString = humanString.join(" ");
-		
+	for(var i = 0; i < files.length; ++i)
+	{	
 		var placed = placeModuleSymbol(createModuleSymbol('rgb(255, 0, 0)'), module_pos.cx, module_pos.cy);
 		
 		module_pos.cx += 60;
@@ -81,9 +86,10 @@ $(document).ready(function() {
 
 		modules[placed.id] = {
 			paper: placed,
-			src: val
+			file_id: i
 		};
-	});
+		console.log(i);
+	}
 });
 
 
@@ -97,8 +103,6 @@ function setupObject(cx, cy)
 	};
 
 	loadSound(dragSrcEl.id, placed._id);
-
-	console.log("placed: ", placed);
 }
 
 function startSound(src)
@@ -111,14 +115,13 @@ function loadSound(paper_id, instance_id)
 	// Check if sound exists in buffer
 	if(objects[paper_id] === undefined)
 	{
-		var url = sounds_path + modules[paper_id].src;
+		var file_id = modules[paper_id]["file_id"];
+
+		var url = files[file_id]["full_path"];
 	
 		var request = new XMLHttpRequest();
     	request.open('GET', url, true);
     	request.responseType = 'arraybuffer';
-    	
-		console.log(a_ctx);
-	
     	request.onload = function () {
     	    a_ctx.decodeAudioData(request.response, function (buffer) {
     	    	var sound;
@@ -132,7 +135,7 @@ function loadSound(paper_id, instance_id)
     	    	sound.panner = a_ctx.createPanner();
 	
     	    	sound.analyser.fftSize = 256;
-    	    	sound.analyser.smoothingTimeConstant = 0.1;
+    	    	sound.analyser.smoothingTimeConstant = 0.5;
 
     	    	if(sound.buffer == null)
 		        {
@@ -173,8 +176,16 @@ function onError()
 
 function removeSound(id)
 {
-	// Remove the image
+	objects[id]["sound"]["source"].stop();
 	objects[id].paper.remove();
+	delete objects[id];
+
+}
+
+function toggleLoop(id)
+{
+	objects[id]["sound"]["source"].loop = !objects[id]["sound"]["source"].loop;
+	console.log("Set loop to " + objects[id]["sound"]["source"].loop + " for object with id " + id);
 }
 
 function getXPan(xpos)

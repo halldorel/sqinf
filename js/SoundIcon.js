@@ -39,8 +39,8 @@ function createModuleSymbol(moduleColor)
 var g_r = 40;
 var res = 16;
 var speed = 8;
-var amp = 15.0;
-var pointAccelConst = 0.003;
+var amp = 10.0;
+var pointAccelConst = 0.010;
 
 // Init wave circle
 for(var i = 0; i < res; ++i)
@@ -106,12 +106,6 @@ var updateWaveCircle = function (event, paper_obj) {
 	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
 	obj.sound.analyser.getByteTimeDomainData(obj.sound.timedomain);
 
-	var pointUpdate = [];
-
-	pointCounter = Math.floor(event.count) % res;
-
-	var odd = event.count % 2;
-
 	for(var i = 0; i < res; i++)
 	{
 		var wavePoint = paper_obj.symbol.definition.segments[i].point;
@@ -133,7 +127,6 @@ var updateWaveCircle = function (event, paper_obj) {
 
 		var initX = initCircle.x;
 		var initY = initCircle.y;
-
 
 		var distSq = ((point.x * point.x) + (point.y * point.y));
 		delta[i] = distSq;
