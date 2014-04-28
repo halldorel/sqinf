@@ -97,8 +97,7 @@ $(document).ready(function() {
 	for(var i = 0; i < files.length; ++i)
 	{	
 		// Read module color if defined, else use gray
-		var moduleColor = (files[i]["color"] !== undefined) ?
-			'rgb(' + colors[files[i]["color"]] + ')' : 'rgb(120, 120, 120)';
+		moduleColor = getModuleColor(i);
 
 		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
 		
@@ -110,6 +109,12 @@ $(document).ready(function() {
 
 	positionModules();
 });
+
+function getModuleColor(file_id)
+{
+	return moduleColor = (files[file_id]["color"] !== undefined) ?
+			'rgb(' + colors[files[file_id]["color"]] + ')' : 'rgb(120, 120, 120)';
+}
 
 function setupObject(cx, cy)
 {
