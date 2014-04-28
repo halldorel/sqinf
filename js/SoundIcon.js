@@ -105,6 +105,7 @@ var updateWaveCircle = function (event, paper_obj) {
 	obj.sound.timedomain = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
 	obj.sound.analyser.getByteTimeDomainData(obj.sound.timedomain);
+	obj.sound.source.onended = function () { removeSound(paper_id); };
 
 	for(var i = 0; i < res; i++)
 	{

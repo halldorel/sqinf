@@ -88,7 +88,6 @@ $(document).ready(function() {
 			paper: placed,
 			file_id: i
 		};
-		console.log(i);
 	}
 });
 
