@@ -157,8 +157,8 @@ function loadSound(paper_id, instance_id)
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 	
-    	    	sound.analyser.fftSize = 256;
-    	    	sound.analyser.smoothingTimeConstant = 0.5;
+    	    	sound.analyser.fftSize = 64;
+    	    	sound.analyser.smoothingTimeConstant = 0.0;
 
     	    	if(sound.buffer == null)
 		        {
@@ -202,7 +202,6 @@ function removeSound(id)
 	objects[id]["sound"]["source"].stop();
 	objects[id].paper.remove();
 	delete objects[id];
-
 }
 
 function toggleLoop(e)
@@ -238,11 +237,6 @@ function setScale(id, y)
 function log10(n)
 {
 	return Math.log(n)/Math.log(10);
-}
-
-function getSoundId(paper_id)
-{
-	return sounds_playing[paper_id];
 }
 
 function changePan(id, pan)

@@ -81,7 +81,8 @@ function smoothen(x)
 
 var ii = smoothen(11);
 
-wave.onFrame = function (event) {
+wave.onFrame = function (event)
+{
 	for(var id in objects)
 	{
 		updateWaveCircle(event, objects[id].paper);
