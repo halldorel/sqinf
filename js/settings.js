@@ -6,12 +6,14 @@ var colors = {
 
 var files = [
 /* 40 BPM */
+/* Amp default : 10.0 */
+/* Accel default : 0.010 */
 	{
 		"name" 	: "Bouncing.mp3",
 		"speed" : 40,
 		"color"	: "green",
-		"amp"	: 20,
-		"accel" : 4
+		"amp"	: 30.0,
+		"accel" : 0.025
 	},
 	{
 		"name" 	: "Cello Portamento.mp3",

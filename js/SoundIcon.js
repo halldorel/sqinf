@@ -38,9 +38,9 @@ function createModuleSymbol(moduleColor)
 
 var g_r = 40;
 var res = 16;
-var speed = 8;
-var amp = 10.0;
-var pointAccelConst = 0.010;
+
+var ampConstDefault = 10.0;
+var pointAccelConstDefault = 0.010;
 
 // Init wave circle
 for(var i = 0; i < res; ++i)
@@ -93,6 +93,10 @@ var updateWaveCircle = function (event, paper_obj) {
 	var paper_id = paper_obj.id;
 	var obj = objects[paper_id];
 	var sound_obj = objects[paper_id]["sound"];
+	var properties = objects[paper_id]["properties"];
+
+	var amp = properties.amp ? properties.amp : ampConstDefault;
+	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
 
 	if(obj === undefined || sound_obj === undefined)
 		return;
@@ -168,6 +172,7 @@ var mouseDownModule = function (e) {
 	// Start preloading audio
 	var paper_id = e.target.id;
 	var file_id = modules[paper_id].file_id;
+	var properties = files[modules[paper_id].file_id];
 
 	var moduleColor = getModuleColor(file_id);
 
@@ -175,7 +180,7 @@ var mouseDownModule = function (e) {
 
 	if(pushedElement !== null)
 	{
-		pushedElement = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y, undefined, moduleColor);
+		pushedElement = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y, undefined, moduleColor, properties);
 	}
 
 	loadSound(paper_id, pushedElement.id);
@@ -218,13 +223,14 @@ function waveFunc (x) {
 	return (40 + (20 * Math.sin(x * 2 * Math.PI)));
 }
 
-function placeWaveSymbol(x, y, scale, color)
+function placeWaveSymbol(x, y, scale, color, properties)
 {
 	color = color || 'rgb(120, 120, 120)';
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	placed.symbol._definition.fillColor = color;
 	objects[placed.id] = {};
 	objects[placed.id]["paper"] = placed;
+	objects[placed.id]["properties"] = properties;
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
