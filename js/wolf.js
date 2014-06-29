@@ -128,11 +128,6 @@ function setupObject(cx, cy)
 	loadSound(dragSrcEl.id, placed._id);
 }
 
-function startSound(src)
-{
-
-}
-
 function loadSound(paper_id, instance_id)
 {
 	// Check if sound exists in buffer
@@ -158,7 +153,7 @@ function loadSound(paper_id, instance_id)
     	    	sound.panner = a_ctx.createPanner();
 	
     	    	sound.analyser.fftSize = 64;
-    	    	sound.analyser.smoothingTimeConstant = 0.0;
+    	    	sound.analyser.smoothingTimeConstant = 0.9;
 
     	    	if(sound.buffer == null)
 		        {
@@ -171,7 +166,6 @@ function loadSound(paper_id, instance_id)
     			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
     			sound.panner.connect(a_ctx.destination);
-    			sound.source.start(0);
 
     			objects[instance_id].sound = sound;
 	
@@ -190,6 +184,17 @@ function loadSound(paper_id, instance_id)
     {
     	console.log("yes:", objects[paper_id]);
     }
+}
+
+function startSound(instance_id)
+{
+	var obj = objects[instance_id].sound;
+	while(obj === undefined)
+	{
+		console.log("Started sound ", instance_id)
+	}
+
+	obj.source.start(0);
 }
 
 function onError()
@@ -217,6 +222,7 @@ function getXPan(xpos)
 	var sign = 1;
 	var temp = ((2 * xpos) - width) / width;
 	var pan = temp * 10;
+	return xpos/width;
 	return pan;
 }
 
@@ -241,9 +247,17 @@ function log10(n)
 
 function changePan(id, pan)
 {
+	if(pan.x > 1) pan.x = 1;
+	if(pan.x < -1) pan.x = -1;
+
+	var x = Math.sin(pan.x * Math.PI);
+	var z = Math.sin(pan.x * Math.PI);
+
 	var obj = objects[id];
+
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(pan.x/50, /*pan.y*/0, Math.cos((pan.x/50)*Math.PI));
+		console.log("X: ", 2*pan.x - 1, " Z: ", Math.sin(pan.x * Math.PI));
+		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));
 	}
 }

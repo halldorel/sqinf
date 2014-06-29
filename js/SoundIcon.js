@@ -107,9 +107,7 @@ var updateWaveCircle = function (event, paper_obj) {
 	}
 
 	obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
-	obj.sound.timedomain = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-	obj.sound.analyser.getByteTimeDomainData(obj.sound.timedomain);
 	obj.sound.source.onended = function () { removeSound(paper_id); };
 
 	for(var i = 0; i < res; i++)
@@ -188,6 +186,8 @@ var mouseDownModule = function (e) {
 
 var mouseUp = function (e) {
 	setActiveObjectPan(e);
+	startActiveObject();
+	console.log(objects[pushedElement.id]);
 	pushedElement = null;
 };
 
@@ -200,6 +200,15 @@ function setActiveObjectPan(e)
 	if(pushedElement !== null)
 	{
 		changePan(pushedElement.id, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
+	}
+}
+
+function startActiveObject()
+{
+	if(pushedElement !== null)
+	{
+		if(objects[pushedElement.id].sound.source.playbackState == 0)
+			startSound(pushedElement.id);
 	}
 }
 
