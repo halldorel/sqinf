@@ -189,11 +189,6 @@ function loadSound(paper_id, instance_id)
 function startSound(instance_id)
 {
 	var obj = objects[instance_id].sound;
-	while(obj === undefined)
-	{
-		console.log("Started sound ", instance_id)
-	}
-
 	obj.source.start(0);
 }
 

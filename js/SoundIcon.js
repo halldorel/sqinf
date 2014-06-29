@@ -207,8 +207,19 @@ function startActiveObject()
 {
 	if(pushedElement !== null)
 	{
-		if(objects[pushedElement.id].sound.source.playbackState == 0)
-			startSound(pushedElement.id);
+		var theId = pushedElement.id;
+
+		var startClipNow = function () {
+			if(objects[theId].sound.source.playbackState == 0)
+				startSound(theId);
+
+			clearInterval(interval);
+		};
+
+		var interval = setInterval( function () {
+			if(objects[theId].sound !== undefined)
+				startClipNow();
+		}, 1000);
 	}
 }
 
