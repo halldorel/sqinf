@@ -1,10 +1,3 @@
-//"use strict";
-
-// Dependencies: Dancer & jQuery
-// bach
-
-// Setup the soundManager instance
-
 var sounds = [];
 var html = "";
 var dragSrcEl = null;
@@ -116,18 +109,6 @@ function getModuleColor(file_id)
 			'rgb(' + colors[files[file_id]["color"]] + ')' : 'rgb(120, 120, 120)';
 }
 
-function setupObject(cx, cy)
-{
-	// Reference to placed symbol in paper
-	// Add symbol to object object
-	var placed = placeWaveSymbol(cx, cy);
-	objects[placed._id] = {
-		paper : placed
-	};
-
-	loadSound(dragSrcEl.id, placed._id);
-}
-
 function loadSound(paper_id, instance_id)
 {
 	// Check if sound exists in buffer
@@ -189,6 +170,7 @@ function loadSound(paper_id, instance_id)
 function startSound(instance_id)
 {
 	var obj = objects[instance_id].sound;
+	objects[instance_id].hasStarted = true;
 	obj.source.start(0);
 }
 
@@ -208,6 +190,7 @@ function toggleLoop(e)
 {
 	var id = e.target._id;
 	objects[id]["sound"]["source"].loop = !objects[id]["sound"]["source"].loop;
+	objects[id].loop = !objects[id].loop;
 	console.log("Set loop to " + objects[id]["sound"]["source"].loop + " for object with id " + id);
 }
 
@@ -252,7 +235,60 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		console.log("X: ", 2*pan.x - 1, " Z: ", Math.sin(pan.x * Math.PI));
 		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));
 	}
 }
+
+/****** Scheduler ******/
+
+function Scheduler(tempo)
+{
+	var _handler;
+	var _interval = (60/tempo) * 1000;
+	var _scheduleBuffer = [];
+
+	function _queue(theId)
+	{
+		console.log("queued ", theId);
+
+		if(_scheduleBuffer.indexOf(theId) == -1)
+			_scheduleBuffer.push(theId);
+	}
+
+	function _clearQueue()
+	{
+		_scheduleBuffer = [];
+	}
+
+	var _callback = function()
+	{
+		console.log("Schedule buffer: ", _scheduleBuffer);
+		for(var i = 0; i < _scheduleBuffer.length; i++)
+		{
+			startSound(_scheduleBuffer[i]);
+			console.log("Scheduler started sound: ", _scheduleBuffer[i]);
+		}
+
+		_clearQueue();
+		console.log("Tick");
+	}
+
+	function _schedule()
+	{
+		_handler = setInterval(_callback, _interval);
+	}
+
+	function _deschedule()
+	{
+		clearInterval(_handler);
+	}
+
+	return {
+		queue : _queue,
+		schedule : _schedule,
+		deschedule: _deschedule
+	}
+}
+
+var sched = new Scheduler(40);
+sched.schedule();

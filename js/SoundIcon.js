@@ -20,6 +20,14 @@ var peakMeter = new paper.Path({
 	strokeWidth: 5
 });
 
+var infinitySymbol = new paper.Symbol(new paper.PointText({
+	point : [0, 0],
+	content : '∞',
+	fillColor : 'black',
+	fontFamily : 'Times New Roman',
+	fontSize : 40
+}));
+
 var updates = 0;
 
 function createModuleSymbol(moduleColor)
@@ -32,7 +40,6 @@ function createModuleSymbol(moduleColor)
 	});
 
 	var moduleSymbol = new paper.Symbol(modulePath);
-
 	return moduleSymbol;
 }
 
@@ -161,7 +168,7 @@ var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
 		pushedElement.position = e.point;
-		setActiveObjectScale(e);
+		//setActiveObjectScale(e);
 		setActiveObjectPan(e);
 	}
 };
@@ -186,7 +193,7 @@ var mouseDownModule = function (e) {
 
 var mouseUp = function (e) {
 	setActiveObjectPan(e);
-	startActiveObject();
+	startActiveObject(true);
 	console.log(objects[pushedElement.id]);
 	pushedElement = null;
 };
@@ -203,22 +210,34 @@ function setActiveObjectPan(e)
 	}
 }
 
-function startActiveObject()
+function startActiveObject(scheduled)
 {
+	var scheduled = scheduled || false;
 	if(pushedElement !== null)
 	{
 		var theId = pushedElement.id;
 
-		var startClipNow = function () {
-			if(objects[theId].sound.source.playbackState == 0)
-				startSound(theId);
+		if (objects[theId].hasStarted === true)
+			return;
+
+		var startClipNowAndStopTrying = function () {
+			console.log(theId, " has started : ", objects[theId].hasStarted);
+			if(scheduled && objects[theId].hasStarted === false)
+			{
+				sched.queue(theId);
+			}
 
 			clearInterval(interval);
+			console.log("Cleared interval")
 		};
 
 		var interval = setInterval( function () {
+			// Try until sound becomes available, then shedule it
+			// and stop trying
 			if(objects[theId].sound !== undefined)
-				startClipNow();
+			{
+				startClipNowAndStopTrying();
+			}
 		}, 1000);
 	}
 }
@@ -248,9 +267,8 @@ function placeWaveSymbol(x, y, scale, color, properties)
 	color = color || 'rgb(120, 120, 120)';
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	placed.symbol._definition.fillColor = color;
-	objects[placed.id] = {};
-	objects[placed.id]["paper"] = placed;
-	objects[placed.id]["properties"] = properties;
+
+	pushObject(placed, properties);
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
@@ -258,6 +276,15 @@ function placeWaveSymbol(x, y, scale, color, properties)
 	placed.onDoubleClick = doubleClick;
 	placed.onUpdate = updateWaveCircle;
 	return placed;
+}
+
+function pushObject(paper, properties)
+{
+	objects[paper.id] = {
+		"paper"			: paper,
+		"properties"	: properties,
+		"hasStarted" 	: false
+	}
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)
