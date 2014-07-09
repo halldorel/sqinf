@@ -25,19 +25,21 @@ var objects = {};
 
 var windowPadding = 40;
 
-var cw = document.body.clientWidth - (2 * windowPadding);
-var ch = document.body.clientHeight - (2 * windowPadding);
+var cw = document.body.clientWidth;
+var ch = document.body.clientHeight;
+var _cw = cw;
+var _ch = ch;
 
 window.onresize = function () {
-	cw = document.body.clientWidth - (2 * windowPadding);
-	ch = document.body.clientHeight - (2 * windowPadding);
-	$(canvas).attr('width', cw);
-	$(canvas).attr('height', ch);
+	_cw = document.body.clientWidth - (2 * windowPadding);
+	_ch = document.body.clientHeight - (2 * windowPadding);
+	$(canvas).attr('width', _cw);
+	$(canvas).attr('height', _ch);
 	positionModules();
 };
 
-$(canvas).attr('width', cw);
-$(canvas).attr('height', ch);
+$(canvas).attr('width', _cw);
+$(canvas).attr('height', _ch);
 
 var ctx = canvas.getContext("2d");
 var a_ctx;

@@ -192,6 +192,12 @@ var mouseDownModule = function (e) {
 };
 
 var mouseUp = function (e) {
+	console.log(pushedElement.position);
+	if(isOffScreen(pushedElement.position))
+	{
+		removeSound(pushedElement.id);
+		return;
+	}
 	setActiveObjectPan(e);
 	startActiveObject(true);
 	console.log(objects[pushedElement.id]);
@@ -285,6 +291,11 @@ function pushObject(paper, properties)
 		"properties"	: properties,
 		"hasStarted" 	: false
 	}
+}
+
+function isOffScreen(pos)
+{
+	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 0);
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)
