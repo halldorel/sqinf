@@ -214,10 +214,9 @@ function getYPan(ypos)
 	return pan;
 }
 
-function setScale(id, y)
+function getScale(y)
 {
-	var scale = 1+y/ch;
-	objects[id].scale = scale;
+	return 2*(1+y)/ch;
 }
 
 function log10(n)

@@ -28,6 +28,77 @@ var infinitySymbol = new paper.Symbol(new paper.PointText({
 	fontSize : 40
 }));
 
+var numberOfLines = 20;
+
+var startPoints = [];
+var endPoints = [];
+
+var linePaths = [];
+
+for (var i = 0; i < numberOfLines; i++)
+{
+	startPoints.push(new paper.Point(0, 0));
+	endPoints.push(new paper.Point(0, 0));
+}
+
+function calculatePerspectiveGridEndpoints()
+{
+	for(var i = 0; i < numberOfLines; i++)
+	{
+		var startX = (i/numberOfLines) * _cw;
+	
+		var endX = (4*i/numberOfLines) * _cw;
+		endX = (endX - 1.5*_cw);
+	
+		startPoints[i].x = startX;
+		startPoints[i].y = 200;
+
+		endPoints[i].x = endX;
+		endPoints[i].y = _ch;
+	}
+}
+
+function drawPerspectiveGrid()
+{
+	// Draw perspective grid
+	for(var i = 0; i < numberOfLines; i++)
+	{
+		linePaths.push(new paper.Path.Line(startPoints[i], endPoints[i]));
+		linePaths[i].strokeColor = "#333";
+		linePaths[i].strokeWidth = 1;
+	}
+}
+
+var startPointsHz = [];
+var endPointsHz = [];
+
+var linePathsHz = [];
+
+function calculateHorizontalGridEndpoints()
+{
+	for(var i = 0; i < numberOfLines; i++)
+	{
+		startPointsHz.push(new paper.Point(0, (200 + (Math.pow(1.1, i)*i/numberOfLines*(_ch-200)))));
+		endPointsHz.push(new paper.Point(cw, (200 + (Math.pow(1.1, i)*i/numberOfLines*(_ch-200)))));
+	}
+}
+
+function drawHorizontalLines()
+{
+	for(var i = 0; i < numberOfLines/2; i++)
+	{
+		linePathsHz.push(new paper.Path.Line(startPointsHz[i], endPointsHz[i]));
+		linePathsHz[i].strokeColor = "#333";
+		linePathsHz[i].strokeWidth = 1;
+		console.log(linePathsHz[i]);
+	}
+}
+
+calculatePerspectiveGridEndpoints();
+drawPerspectiveGrid();
+calculateHorizontalGridEndpoints()
+drawHorizontalLines();
+
 var updates = 0;
 
 function createModuleSymbol(moduleColor)
@@ -155,6 +226,12 @@ var updateWaveCircle = function (event, paper_obj) {
 			obj.pointSpeed[i] = 0;
 		}
 	}
+
+	var scale = getScale(paper_obj.position.y);
+
+	paper_obj.matrix.scaleX = scale;
+	paper_obj.matrix.scaleY = scale;
+
 	paper_obj.symbol.definition.smooth();
 }
 
@@ -168,7 +245,6 @@ var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
 		pushedElement.position = e.point;
-		//setActiveObjectScale(e);
 		setActiveObjectPan(e);
 	}
 };
@@ -245,14 +321,6 @@ function startActiveObject(scheduled)
 				startClipNowAndStopTrying();
 			}
 		}, 1000);
-	}
-}
-
-function setActiveObjectScale(e) 
-{
-	if(pushedElement !== null)
-	{
-		setScale(pushedElement.id, e.point.y);
 	}
 }
 
