@@ -23,51 +23,62 @@ var peakMeter = new paper.Path({
 var infinitySymbol = new paper.Symbol(new paper.PointText({
 	point : [0, 0],
 	content : '∞',
-	fillColor : 'black',
+	fillColor : 'white',
 	fontFamily : 'Times New Roman',
 	fontSize : 40
 }));
 
-var numberOfLines = 20;
+var numberOfLines = 18;
 
 var startPoints = [];
 var endPoints = [];
 
 var linePaths = [];
 
-for (var i = 0; i < numberOfLines; i++)
-{
-	startPoints.push(new paper.Point(0, 0));
-	endPoints.push(new paper.Point(0, 0));
-}
-
 function calculatePerspectiveGridEndpoints()
 {
-	for(var i = 0; i < numberOfLines; i++)
+	startPoints = [];
+	endPoints = [];
+
+	for (var i = 0; i < numberOfLines; i++)
 	{
-		var startX = (i/numberOfLines) * _cw;
-	
-		var endX = (4*i/numberOfLines) * _cw;
-		endX = (endX - 1.5*_cw);
+		startPoints.push(new paper.Point(0, 0));
+		endPoints.push(new paper.Point(0, 0));
+	}
+
+	for(var i = 0; i < numberOfLines-1; i++)
+	{
+		//var startX = (i/numberOfLines) * _cw;
+		var startX = 0.5*_cw;
+
+		var endX = (10*i/numberOfLines) * _cw;
+		endX = (endX - 4.5*_cw);
 	
 		startPoints[i].x = startX;
 		startPoints[i].y = 200;
 
-		endPoints[i].x = endX;
-		endPoints[i].y = _ch;
+		endPoints[i].x = endX;//*Math.sin(i/numberOfLines*Math.PI);
+		endPoints[i].y = (_ch)*2*Math.sin((1+i)/numberOfLines*Math.PI);
+
+		if (endPoints[i].y < 200)
+		{
+			endPoints[i].y = 200;
+		}
 	}
 }
 
 function drawPerspectiveGrid()
 {
+	linePaths = [];
 	// Draw perspective grid
 	for(var i = 0; i < numberOfLines; i++)
 	{
 		linePaths.push(new paper.Path.Line(startPoints[i], endPoints[i]));
-		linePaths[i].strokeColor = "#333";
+		linePaths[i].strokeColor = "#999";
 		linePaths[i].strokeWidth = 1;
 	}
 }
+
 
 var startPointsHz = [];
 var endPointsHz = [];
@@ -76,22 +87,47 @@ var linePathsHz = [];
 
 function calculateHorizontalGridEndpoints()
 {
+	startPointsHz = [];
+	endPointsHz = [];
+
 	for(var i = 0; i < numberOfLines; i++)
 	{
-		startPointsHz.push(new paper.Point(0, (200 + (Math.pow(1.1, i)*i/numberOfLines*(_ch-200)))));
-		endPointsHz.push(new paper.Point(cw, (200 + (Math.pow(1.1, i)*i/numberOfLines*(_ch-200)))));
+		startPointsHz.push(new paper.Point(0, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
+		endPointsHz.push(new paper.Point(cw, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
 	}
 }
 
 function drawHorizontalLines()
 {
+	linePathsHz = [];
+
 	for(var i = 0; i < numberOfLines/2; i++)
 	{
 		linePathsHz.push(new paper.Path.Line(startPointsHz[i], endPointsHz[i]));
-		linePathsHz[i].strokeColor = "#333";
+		linePathsHz[i].strokeColor = "#999";
 		linePathsHz[i].strokeWidth = 1;
 		console.log(linePathsHz[i]);
 	}
+}
+
+function removeAllFromArray(array)
+{
+	if(!(array === []))
+	{
+		for(var i in array)
+		{
+			if(array[i] !== undefined)
+			{
+				array[i].remove();
+			}
+		}
+	}
+}
+
+function clearGrid()
+{
+	removeAllFromArray(linePaths);
+	removeAllFromArray(linePathsHz);
 }
 
 calculatePerspectiveGridEndpoints();
@@ -163,6 +199,24 @@ wave.onFrame = function (event)
 {
 	for(var id in objects)
 	{
+		if(objects[id].position !== undefined)
+		{
+			//objects[id].paper.position = objects[id].position;
+		}
+
+		if(objects[id].infinitySymbol === undefined)
+		{
+			objects[id].infinitySymbol = infinitySymbol.place(objects[id].position);
+			objects[id].infinitySymbol.setOpacity(0);
+		}
+		
+		objects[id].infinitySymbol.setOpacity(0);
+		if(objects[id].loop)
+		{
+			objects[id].infinitySymbol.position = objects[id].position;
+			objects[id].infinitySymbol.setOpacity(1);
+		}
+
 		updateWaveCircle(event, objects[id].paper);
 	}
 }
@@ -244,7 +298,9 @@ var mouseDown = function (e) {
 var mouseDrag = function (e) {
 	if(pushedElement !== null)
 	{
+		objects[pushedElement.id].position = e.point;
 		pushedElement.position = e.point;
+		correctStackingOrder(e)
 		setActiveObjectPan(e);
 	}
 };
@@ -283,6 +339,16 @@ var mouseUp = function (e) {
 var doubleClick = function (e) {
 	toggleLoop(e);
 };
+
+function correctStackingOrder(e)
+{
+	if(pushedElement !== null)
+	{
+		var index = Math.floor(e.point.y)
+		objects[pushedElement.id].paper.index = index;
+		console.log(objects[pushedElement.id].paper.index);
+	}
+}
 
 function setActiveObjectPan(e) 
 {
@@ -341,7 +407,6 @@ function placeWaveSymbol(x, y, scale, color, properties)
 	color = color || 'rgb(120, 120, 120)';
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	placed.symbol._definition.fillColor = color;
-
 	pushObject(placed, properties);
 	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
@@ -363,7 +428,7 @@ function pushObject(paper, properties)
 
 function isOffScreen(pos)
 {
-	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 0);
+	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)

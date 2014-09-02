@@ -22,7 +22,6 @@ var modules = {};
 var objects = {};
 
 // Global vars
-
 var windowPadding = 40;
 
 var cw = document.body.clientWidth;
@@ -36,6 +35,12 @@ window.onresize = function () {
 	$(canvas).attr('width', _cw);
 	$(canvas).attr('height', _ch);
 	positionModules();
+
+	clearGrid();
+	calculatePerspectiveGridEndpoints();
+	drawPerspectiveGrid();
+	calculateHorizontalGridEndpoints()
+	drawHorizontalLines();
 };
 
 $(canvas).attr('width', _cw);
@@ -182,8 +187,13 @@ function onError()
 }
 
 function removeSound(id)
-{
-	objects[id]["sound"]["source"].stop();
+{	
+	
+	if(objects[id]["sound"]["source"].playbackState !== undefined ||
+		objects[id]["sound"]["source"].playbackState == 0)
+	{
+		objects[id]["sound"]["source"].stop();
+	}
 	objects[id].paper.remove();
 	delete objects[id];
 }
@@ -216,7 +226,9 @@ function getYPan(ypos)
 
 function getScale(y)
 {
-	return 2*(1+y)/ch;
+	var scale = 4*(y - 200)/ch;
+	if (scale < 0.05) scale = 0.05;
+	return scale;
 }
 
 function log10(n)
