@@ -196,7 +196,6 @@ var ii = smoothen(11);
 
 wave.onFrame = function (event)
 {
-
 	for(var id in objects)
 	{
 		objects[id].infinitySymbol.setOpacity(0);
@@ -409,11 +408,11 @@ function startActiveObject(scheduled, object)
 }
 
 var mouseUpModule = function () {
-	console.log("mouseUpModule:", e.target);/*
+	console.log("mouseUpModule:", e.target);
 	var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
 	console.log("Starting active object: ", placed.id)
 	startActiveObject(true, placed);
-	pushedElement = null;*/
+	pushedElement = null;
 };
 
 // Helper functions
