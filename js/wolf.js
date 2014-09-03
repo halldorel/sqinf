@@ -93,6 +93,8 @@ function positionModules()
 	}
 }
 
+var waveCircleLayer;
+
 $(document).ready(function() {
 	for(var i = 0; i < files.length; ++i)
 	{	
@@ -108,6 +110,16 @@ $(document).ready(function() {
 	}
 
 	positionModules();
+
+	waveCircleLayer = new paper.Layer();
+
+	waveCircleLayer.activate();
+
+	calculatePerspectiveGridEndpoints();
+	drawPerspectiveGrid();
+	calculateHorizontalGridEndpoints()
+	drawHorizontalLines();
+
 });
 
 function getModuleColor(file_id)
@@ -137,11 +149,22 @@ function loadSound(paper_id, instance_id)
     	    	};
 	
 				sound.convolver = a_ctx.createConvolver();
-    	    	sound.analyser = a_ctx.createAnalyser();
+    	    	sound.analyser = a_ctx.createScriptProcessor(1024, 1, 1);
     	    	sound.panner = a_ctx.createPanner();
 	
-    	    	sound.analyser.fftSize = 64;
-    	    	sound.analyser.smoothingTimeConstant = 0.9;
+    	    	sound.analyser.onaudioprocess = function(e) {
+    	    		var out = e.outputBuffer.getChannelData(0);
+					var int = e.inputBuffer.getChannelData(0);
+					var max = 0;
+		
+					for(var i = 0; i < int.length; i++){
+						out[i] = 0;//prevent feedback and we only need the input data
+						max = int[i] > max ? int[i] : max;
+					}
+					//convert from magitude to decibel
+					var db = 20*Math.log(Math.max(max,Math.pow(10,-72/20)))/Math.LN10;
+					sound.amplitude = db;
+    	    	};
 
     	    	if(sound.buffer == null)
 		        {
@@ -151,11 +174,14 @@ function loadSound(paper_id, instance_id)
 				sound.source = a_ctx.createBufferSource();
     			sound.source.buffer = sound.buffer;
     			sound.source.connect(sound.analyser);
-    			sound.analyser.connect(sound.panner);
+    			sound.source.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
     			sound.panner.connect(a_ctx.destination);
 
-    			objects[instance_id].sound = sound;
+    			if(objects[instance_id] !== undefined)
+    			{
+    				objects[instance_id].sound = sound;
+    			}
 	
     	    }, onError);
     	};
@@ -186,24 +212,16 @@ function onError()
 	console.log("Error loading sound ");
 }
 
-function removeSound(id)
-{	
-	
-	if(objects[id]["sound"]["source"].playbackState !== undefined ||
-		objects[id]["sound"]["source"].playbackState == 0)
-	{
-		objects[id]["sound"]["source"].stop();
-	}
-	objects[id].paper.remove();
-	delete objects[id];
-}
 
 function toggleLoop(e)
 {
 	var id = e.target._id;
-	objects[id]["sound"]["source"].loop = !objects[id]["sound"]["source"].loop;
-	objects[id].loop = !objects[id].loop;
-	console.log("Set loop to " + objects[id]["sound"]["source"].loop + " for object with id " + id);
+	if(objects[id] !== undefined && objects[id].sound !== undefined)
+	{
+		objects[id].sound.source.loop = !objects[id].sound.source.loop;
+		objects[id].loop = !objects[id].loop;
+		console.log("Set loop to " + objects[id].sound.source.loop + " for object with id " + id);
+	}
 }
 
 function getXPan(xpos)
@@ -296,12 +314,35 @@ function Scheduler(tempo)
 		clearInterval(_handler);
 	}
 
+	function _removeFromBuffer(id)
+	{
+		if(_scheduleBuffer[id] !== undefined)
+		{
+			delete _scheduleBuffer[id];
+		}
+	}
+
 	return {
 		queue : _queue,
 		schedule : _schedule,
-		deschedule: _deschedule
+		deschedule: _deschedule,
+		removeFromBuffer: _removeFromBuffer
 	}
 }
 
 var sched = new Scheduler(40);
 sched.schedule();
+
+
+function removeSound(id)
+{	
+	sched.removeFromBuffer(id);
+	if(objects[id] !== undefined && objects[id].hasStarted == true)
+	{
+		objects[id].sound.source.stop();
+	}
+
+	objects[id].paper.remove();
+	objects[id].infinitySymbol.remove();
+	delete objects[id];
+}

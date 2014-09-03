@@ -35,6 +35,8 @@ var endPoints = [];
 
 var linePaths = [];
 
+var perspectiveGridLayer = new paper.Layer();
+
 function calculatePerspectiveGridEndpoints()
 {
 	startPoints = [];
@@ -69,6 +71,7 @@ function calculatePerspectiveGridEndpoints()
 
 function drawPerspectiveGrid()
 {
+	perspectiveGridLayer.activate();
 	linePaths = [];
 	// Draw perspective grid
 	for(var i = 0; i < numberOfLines; i++)
@@ -77,8 +80,8 @@ function drawPerspectiveGrid()
 		linePaths[i].strokeColor = "#999";
 		linePaths[i].strokeWidth = 1;
 	}
+	waveCircleLayer.activate();
 }
-
 
 var startPointsHz = [];
 var endPointsHz = [];
@@ -99,6 +102,7 @@ function calculateHorizontalGridEndpoints()
 
 function drawHorizontalLines()
 {
+	perspectiveGridLayer.activate();
 	linePathsHz = [];
 
 	for(var i = 0; i < numberOfLines/2; i++)
@@ -108,6 +112,7 @@ function drawHorizontalLines()
 		linePathsHz[i].strokeWidth = 1;
 		console.log(linePathsHz[i]);
 	}
+	waveCircleLayer.activate();
 }
 
 function removeAllFromArray(array)
@@ -129,11 +134,6 @@ function clearGrid()
 	removeAllFromArray(linePaths);
 	removeAllFromArray(linePathsHz);
 }
-
-calculatePerspectiveGridEndpoints();
-drawPerspectiveGrid();
-calculateHorizontalGridEndpoints()
-drawHorizontalLines();
 
 var updates = 0;
 
@@ -207,6 +207,7 @@ wave.onFrame = function (event)
 		if(objects[id].infinitySymbol === undefined)
 		{
 			objects[id].infinitySymbol = infinitySymbol.place(objects[id].position);
+			waveCircleLayer.activate();
 			objects[id].infinitySymbol.setOpacity(0);
 		}
 		
@@ -238,14 +239,14 @@ var updateWaveCircle = function (event, paper_obj) {
 		obj.pointSpeed = [];
 	}
 
-	obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
-	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
+	//obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
+	//obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
 	obj.sound.source.onended = function () { removeSound(paper_id); };
 
 	for(var i = 0; i < res; i++)
 	{
 		var wavePoint = paper_obj.symbol.definition.segments[i].point;
-		var	freq = sound_obj.fftdata[i];
+		var	freq = sound_obj.amplitude;
 		var j = Math.PI*2*i/res;
 		wavePoint.x = wavePoint.x + amp * 0.001 * freq * Math.cos(j);
 		wavePoint.y = wavePoint.y + amp * 0.001 * freq * Math.sin(j);
@@ -292,7 +293,19 @@ var updateWaveCircle = function (event, paper_obj) {
 // Event listeners
 var pushedElement = null;
 var mouseDown = function (e) {
-	pushedElement = e.target;
+	console.log(e.point);
+
+	for(var i in waveCircleLayer.children)
+	{
+		if(waveCircleLayer.children[i].hitTest(e.point, { fill:true }))
+		{
+			pushedElement = waveCircleLayer.children[i];
+			console.log("clicked item: ", pushedElement);
+			break;
+		}
+	}
+
+	//pushedElement = ;
 };
 
 var mouseDrag = function (e) {
@@ -325,11 +338,15 @@ var mouseDownModule = function (e) {
 
 var mouseUp = function (e) {
 	console.log(pushedElement.position);
+	
 	if(isOffScreen(pushedElement.position))
 	{
+		console.log("Removed sound", pushedElement.id)
 		removeSound(pushedElement.id);
+		pushedElement = null;
 		return;
 	}
+
 	setActiveObjectPan(e);
 	startActiveObject(true);
 	console.log(objects[pushedElement.id]);
@@ -344,9 +361,9 @@ function correctStackingOrder(e)
 {
 	if(pushedElement !== null)
 	{
-		var index = Math.floor(e.point.y)
-		objects[pushedElement.id].paper.index = index;
-		console.log(objects[pushedElement.id].paper.index);
+		waveCircleLayer.children.sort(function (a, b) {
+			return a.position.y > a.position.y;
+		});
 	}
 }
 
@@ -382,7 +399,7 @@ function startActiveObject(scheduled)
 		var interval = setInterval( function () {
 			// Try until sound becomes available, then shedule it
 			// and stop trying
-			if(objects[theId].sound !== undefined)
+			if(objects[theId] !== undefined && objects[theId].sound !== undefined)
 			{
 				startClipNowAndStopTrying();
 			}
