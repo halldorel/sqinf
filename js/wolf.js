@@ -133,6 +133,7 @@ function loadSound(paper_id, instance_id)
 	// Check if sound exists in buffer
 	if(objects[paper_id] === undefined)
 	{
+
 		var file_id = modules[paper_id]["file_id"];
 
 		var url = files[file_id]["full_path"];
@@ -141,6 +142,7 @@ function loadSound(paper_id, instance_id)
     	request.open('GET', url, true);
     	request.responseType = 'arraybuffer';
     	request.onload = function () {
+    		console.log("onload: ", this);
     	    a_ctx.decodeAudioData(request.response, function (buffer) {
     	    	var sound;
 	
@@ -149,22 +151,8 @@ function loadSound(paper_id, instance_id)
     	    	};
 	
 				sound.convolver = a_ctx.createConvolver();
-    	    	sound.analyser = a_ctx.createScriptProcessor(1024, 1, 1);
+    	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
-	
-    	    	sound.analyser.onaudioprocess = function(e) {
-    	    		var out = e.outputBuffer.getChannelData(0);
-					var int = e.inputBuffer.getChannelData(0);
-					var max = 0;
-		
-					for(var i = 0; i < int.length; i++){
-						out[i] = 0;//prevent feedback and we only need the input data
-						max = int[i] > max ? int[i] : max;
-					}
-					//convert from magitude to decibel
-					var db = 20*Math.log(Math.max(max,Math.pow(10,-72/20)))/Math.LN10;
-					sound.amplitude = db;
-    	    	};
 
     	    	if(sound.buffer == null)
 		        {
@@ -174,15 +162,12 @@ function loadSound(paper_id, instance_id)
 				sound.source = a_ctx.createBufferSource();
     			sound.source.buffer = sound.buffer;
     			sound.source.connect(sound.analyser);
-    			sound.source.connect(sound.panner);
+    			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
     			sound.panner.connect(a_ctx.destination);
 
-    			if(objects[instance_id] !== undefined)
-    			{
-    				objects[instance_id].sound = sound;
-    			}
-	
+    			objects[instance_id].sound = sound;
+    			
     	    }, onError);
     	};
 	
@@ -293,7 +278,6 @@ function Scheduler(tempo)
 
 	var _callback = function()
 	{
-		console.log("Schedule buffer: ", _scheduleBuffer);
 		for(var i = 0; i < _scheduleBuffer.length; i++)
 		{
 			startSound(_scheduleBuffer[i]);
@@ -301,7 +285,6 @@ function Scheduler(tempo)
 		}
 
 		_clearQueue();
-		console.log("Tick");
 	}
 
 	function _schedule()
