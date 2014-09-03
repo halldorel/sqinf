@@ -25,7 +25,7 @@ var infinitySymbol = new paper.Symbol(new paper.PointText({
 	content : '∞',
 	fillColor : 'white',
 	fontFamily : 'Times New Roman',
-	fontSize : 40
+	fontSize : 20
 }));
 
 var numberOfLines = 18;
@@ -207,14 +207,13 @@ wave.onFrame = function (event)
 		if(objects[id].infinitySymbol === undefined)
 		{
 			objects[id].infinitySymbol = infinitySymbol.place(objects[id].position);
-			waveCircleLayer.activate();
+			objects[id].infinitySymbol.position.y += 1;
 			objects[id].infinitySymbol.setOpacity(0);
 		}
 		
 		objects[id].infinitySymbol.setOpacity(0);
 		if(objects[id].loop)
 		{
-			objects[id].infinitySymbol.position = objects[id].position;
 			objects[id].infinitySymbol.setOpacity(1);
 		}
 
@@ -300,6 +299,7 @@ var mouseDown = function (e) {
 		if(waveCircleLayer.children[i].hitTest(e.point, { fill:true }))
 		{
 			pushedElement = waveCircleLayer.children[i];
+			correctInfinity()
 			console.log("clicked item: ", pushedElement);
 			break;
 		}
@@ -313,10 +313,22 @@ var mouseDrag = function (e) {
 	{
 		objects[pushedElement.id].position = e.point;
 		pushedElement.position = e.point;
+
+		correctInfinity();
+
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
+
 	}
 };
+
+function correctInfinity()
+{
+	objects[pushedElement.id].infinitySymbol.position = objects[pushedElement.id].position;
+	objects[pushedElement.id].infinitySymbol.position.y += 1;
+	objects[pushedElement.id].infinitySymbol._matrix.scaleX = objects[pushedElement.id].paper._matrix.scaleX;
+	objects[pushedElement.id].infinitySymbol._matrix.scaleY = objects[pushedElement.id].paper._matrix.scaleY;
+}
 
 var mouseDownModule = function (e) {
 	// Start preloading audio
@@ -361,9 +373,11 @@ function correctStackingOrder(e)
 {
 	if(pushedElement !== null)
 	{
+		console.log("Before: ", waveCircleLayer.children);
 		waveCircleLayer.children.sort(function (a, b) {
-			return a.position.y > a.position.y;
+			return a.position.y >= b.position.y;
 		});
+		console.log("After: ", waveCircleLayer.children);
 	}
 }
 
