@@ -22,7 +22,7 @@ var modules = {};
 var objects = {};
 
 // Global vars
-var windowPadding = 40;
+var windowPadding = 0;
 
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
@@ -30,8 +30,10 @@ var _cw = cw;
 var _ch = ch;
 
 window.onresize = function () {
-	_cw = document.body.clientWidth - (2 * windowPadding);
-	_ch = document.body.clientHeight - (2 * windowPadding);
+	cw = document.body.clientWidth - (2 * windowPadding);
+	ch = document.body.clientHeight - (2 * windowPadding);
+	_cw = cw;
+	_ch = ch;
 	$(canvas).attr('width', _cw);
 	$(canvas).attr('height', _ch);
 	positionModules();
@@ -95,19 +97,21 @@ function positionModules()
 
 var waveCircleLayer;
 
-$(document).ready(function() {
+function setupInitialLayout()
+{
 	for(var i = 0; i < files.length; ++i)
 	{	
 		// Read module color if defined, else use gray
-		moduleColor = getModuleColor(i);
-
+		var moduleColor = Settings.colorForName(i);
 		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
 		
+		ModuleManager.addModuleWithKeyAndIndex(i, placed);
+
 		modules[placed.id] = {
 			paper: placed,
 			file_id: i
 		};
-	}
+	} 
 
 	positionModules();
 
@@ -119,21 +123,17 @@ $(document).ready(function() {
 	drawPerspectiveGrid();
 	calculateHorizontalGridEndpoints()
 	drawHorizontalLines();
-
-});
-
-function getModuleColor(file_id)
-{
-	return moduleColor = (files[file_id]["color"] !== undefined) ?
-			'rgb(' + colors[files[file_id]["color"]] + ')' : 'rgb(120, 120, 120)';
 }
+
+$(document).ready(function() {
+	setupInitialLayout();
+});
 
 function loadSound(paper_id, instance_id)
 {
 	// Check if sound exists in buffer
 	if(objects[paper_id] === undefined)
 	{
-
 		var file_id = modules[paper_id]["file_id"];
 
 		var url = files[file_id]["full_path"];
@@ -142,7 +142,6 @@ function loadSound(paper_id, instance_id)
     	request.open('GET', url, true);
     	request.responseType = 'arraybuffer';
     	request.onload = function () {
-    		console.log("onload: ", this);
     	    a_ctx.decodeAudioData(request.response, function (buffer) {
     	    	var sound;
 	
@@ -150,7 +149,6 @@ function loadSound(paper_id, instance_id)
     	    		buffer: null
     	    	};
 	
-				sound.convolver = a_ctx.createConvolver();
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 
@@ -255,67 +253,8 @@ function changePan(id, pan)
 	}
 }
 
-/****** Scheduler ******/
-
-function Scheduler(tempo)
-{
-	var _handler;
-	var _interval = (60/tempo) * 1000;
-	var _scheduleBuffer = [];
-
-	function _queue(theId)
-	{
-		console.log("queued ", theId);
-
-		if(_scheduleBuffer.indexOf(theId) == -1)
-			_scheduleBuffer.push(theId);
-	}
-
-	function _clearQueue()
-	{
-		_scheduleBuffer = [];
-	}
-
-	var _callback = function()
-	{
-		for(var i = 0; i < _scheduleBuffer.length; i++)
-		{
-			startSound(_scheduleBuffer[i]);
-			console.log("Scheduler started sound: ", _scheduleBuffer[i]);
-		}
-
-		_clearQueue();
-	}
-
-	function _schedule()
-	{
-		_handler = setInterval(_callback, _interval);
-	}
-
-	function _deschedule()
-	{
-		clearInterval(_handler);
-	}
-
-	function _removeFromBuffer(id)
-	{
-		if(_scheduleBuffer[id] !== undefined)
-		{
-			delete _scheduleBuffer[id];
-		}
-	}
-
-	return {
-		queue : _queue,
-		schedule : _schedule,
-		deschedule: _deschedule,
-		removeFromBuffer: _removeFromBuffer
-	}
-}
-
-var sched = new Scheduler(40);
+var sched = new Scheduler(SLOWEST_BPM);
 sched.schedule();
-
 
 function removeSound(id)
 {	

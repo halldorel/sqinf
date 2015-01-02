@@ -1,3 +1,6 @@
+// Used by Scheduler
+var SLOWEST_BPM = 40;
+
 var colors = {
 	"green" : "0, 255, 0",
 	"red"	: "255, 0, 0",
@@ -384,3 +387,16 @@ var files = [
 		"accel" : 0.022
 	}
 ];
+
+var Settings = (function()
+{
+	var _colorForName = function(file_id)
+	{
+		return moduleColor = (files[file_id]["color"] !== undefined) ?
+		'rgb(' + colors[files[file_id]["color"]] + ')' : 'rgb(120, 120, 120)';
+	}
+
+	return {
+		colorForName : _colorForName
+	};
+})();

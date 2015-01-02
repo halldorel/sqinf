@@ -365,7 +365,6 @@ function correctStackingOrder(e)
 	waveCircleLayer.children.sort(function (a, b) {
 		return a.position.y >= b.position.y;
 	});
-	
 }
 
 function setActiveObjectPan(e) 
