@@ -1,3 +1,11 @@
+var updates = 0;
+var g_r = 40;
+var res = 16;
+var ampConstDefault = 10.0;
+var pointAccelConstDefault = 0.010;
+var pointCounter = 0;
+var wavCount = 0;
+
 var wave = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 0),
 	strokeWidth: 0,
@@ -20,13 +28,24 @@ var peakMeter = new paper.Path({
 	strokeWidth: 5
 });
 
-var infinitySymbol = new paper.Symbol(new paper.PointText({
-	point : [0, 0],
-	content : '∞',
-	fillColor : 'white',
-	fontFamily : 'Times New Roman',
-	fontSize : 20
-}));
+for(var i = 0; i < res; ++i)
+{
+	var j = Math.PI*2*i/res;
+	
+	var x = g_r * Math.cos(j);
+	var y = g_r * Math.sin(j);
+
+	waveCircle.add(new paper.Point(x, y));
+	waveCircleInit.add(new paper.Point(x, y));
+}
+
+waveCircle.closed = true;
+waveCircle.smooth();
+waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
+
+var waveCircleSymbol = new paper.Symbol(waveCircle);
+
+var waveCircleInitSymbol = new paper.Symbol(waveCircleInit);
 
 var numberOfLines = 18;
 
@@ -134,8 +153,6 @@ function clearGrid()
 	removeAllFromArray(linePathsHz);
 }
 
-var updates = 0;
-
 function createModuleSymbol(moduleColor)
 {
 	var modulePath = new paper.Path.Circle({
@@ -148,37 +165,6 @@ function createModuleSymbol(moduleColor)
 	var moduleSymbol = new paper.Symbol(modulePath);
 	return moduleSymbol;
 }
-
-var g_r = 40;
-var res = 16;
-
-var ampConstDefault = 10.0;
-var pointAccelConstDefault = 0.010;
-
-// Init wave circle
-for(var i = 0; i < res; ++i)
-{
-	var j = Math.PI*2*i/res;
-	
-	var x = g_r * Math.cos(j);
-	var y = g_r * Math.sin(j);
-
-	waveCircle.add(new paper.Point(x, y));
-	waveCircleInit.add(new paper.Point(x, y));
-}
-
-waveCircle.closed = true;
-waveCircle.smooth();
-waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
-
-var waveCircleSymbol = new paper.Symbol(waveCircle);
-
-var waveCircleInitSymbol = new paper.Symbol(waveCircleInit);
-
-var pointCounter = 0;
-
-var wavCount = 0;
-
 function smoothen(x)
 {
 	var results = [];
@@ -198,10 +184,9 @@ wave.onFrame = function (event)
 {
 	for(var id in objects)
 	{
-		objects[id].infinitySymbol.setOpacity(0);
 		if(objects[id].loop)
 		{
-			objects[id].infinitySymbol.setOpacity(1);
+
 		}
 
 		updateWaveCircle(event, objects[id].paper);
@@ -282,21 +267,6 @@ var mouseDown = function (e) {
 	console.log("mouseDown: ", e.target);
 
 	pushedElement = e.target;
-
-	/*for(var i in waveCircleLayer.children)
-	{
-		if(waveCircleLayer.children[i].hitTest(e.point, { fill:true }))
-		{
-			pushedElement = waveCircleLayer.children[i];
-			correctInfinity()
-			console.log("clicked item: ", pushedElement);
-			break;
-		}
-	}*/
-
-	correctInfinity();
-
-	//pushedElement = ;
 };
 
 var mouseDrag = function (e) {
@@ -305,9 +275,6 @@ var mouseDrag = function (e) {
 	{
 		objects[pushedElement.id].position = e.point;
 		pushedElement.position = e.point;
-
-		correctInfinity();
-
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
 	}
@@ -317,14 +284,6 @@ var mouseDrag = function (e) {
 	}
 };
 
-function correctInfinity()
-{
-	objects[pushedElement.id].infinitySymbol.position = objects[pushedElement.id].position;
-	objects[pushedElement.id].infinitySymbol.position.y += 1;
-	objects[pushedElement.id].infinitySymbol._matrix.scaleX = objects[pushedElement.id].paper._matrix.scaleX;
-	objects[pushedElement.id].infinitySymbol._matrix.scaleY = objects[pushedElement.id].paper._matrix.scaleY;
-}
-
 var mouseDownModule = function (e) {
 	// Start preloading audio
 	console.log("mouseDownModule:", e.target)
@@ -332,7 +291,7 @@ var mouseDownModule = function (e) {
 	var file_id = modules[paper_id].file_id;
 	var properties = files[modules[paper_id].file_id];
 
-	var moduleColor = getModuleColor(file_id);
+	var moduleColor = Settings.colorForName(file_id);
 
 	pushedElement = placeWaveSymbol(e.point.x, e.point.y, undefined, moduleColor, properties);
 	
@@ -443,11 +402,6 @@ function pushObject(paper, properties)
 		properties : properties,
 		hasStarted  : false
 	}
-
-	objects[paper.id].infinitySymbol = infinitySymbol.place(objects[paper.id].position);
-	objects[paper.id].infinitySymbol.position.y += 1;
-	objects[paper.id].infinitySymbol.setOpacity(0);
-	objects[paper.id].infinitySymbol.locked = true;
 }
 
 function isOffScreen(pos)

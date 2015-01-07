@@ -265,6 +265,5 @@ function removeSound(id)
 	}
 
 	objects[id].paper.remove();
-	objects[id].infinitySymbol.remove();
 	delete objects[id];
 }
