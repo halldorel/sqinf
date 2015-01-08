@@ -1,5 +1,6 @@
 var updates = 0;
 var g_r = 40;
+var moduleRadius = 20;
 var res = 16;
 var ampConstDefault = 10.0;
 var pointAccelConstDefault = 0.010;
@@ -17,6 +18,16 @@ var waveCircle = new paper.Path({
 	strokeWidth: 0, 
 	strokeCap: 'square'
 });
+
+var clockPath = new paper.Path({
+	strokeColor: new paper.Color(0, 0, 0, 1),
+	strokeWidth: 2, 
+	strokeCap: 'square'});
+
+clockPath.add(new paper.Point(0, 0));
+clockPath.add(new paper.Point(0, -g_r));
+
+var waveCircleGroup = new paper.Group([waveCircle, clockPath]);
 
 var waveCircleInit = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 0),
@@ -43,7 +54,7 @@ waveCircle.closed = true;
 waveCircle.smooth();
 waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
 
-var waveCircleSymbol = new paper.Symbol(waveCircle);
+var waveCircleSymbol = new paper.Symbol(waveCircleGroup);
 
 var waveCircleInitSymbol = new paper.Symbol(waveCircleInit);
 
@@ -157,7 +168,7 @@ function createModuleSymbol(moduleColor)
 {
 	var modulePath = new paper.Path.Circle({
 		center: [0, 0],
-		radius: 25,
+		radius: moduleRadius,
 		strokeWidth : 0,
 		fillColor: moduleColor
 	});
@@ -184,94 +195,22 @@ wave.onFrame = function (event)
 {
 	for(var id in objects)
 	{
-		if(objects[id].loop)
-		{
-
-		}
-
 		updateWaveCircle(event, objects[id].paper);
 	}
 }
 
-var updateWaveCircle = function (event, paper_obj) {
-	var paper_id = paper_obj.id;
-	var obj = objects[paper_id];
-	var sound_obj = objects[paper_id]["sound"];
-	var properties = objects[paper_id]["properties"];
-
-	var amp = properties.amp ? properties.amp : ampConstDefault;
-	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
-
-	if(obj === undefined || sound_obj === undefined)
-		return;
-
-	if(obj.pointSpeed === undefined)
-	{
-		obj.pointSpeed = [];
-	}
-
-	obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
-	obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-	obj.sound.source.onended = function () { removeSound(paper_id); };
-
-	for(var i = 0; i < res; i++)
-	{
-		var wavePoint = paper_obj.symbol.definition.segments[i].point;
-		var	freq = sound_obj.fftdata[i];
-		var j = Math.PI*2*i/res;
-		wavePoint.x = wavePoint.x + amp * 0.001 * freq * Math.cos(j);
-		wavePoint.y = wavePoint.y + amp * 0.001 * freq * Math.sin(j);
-	}
-
-	var delta = [];
-	var prevDelta = [];
-
-	for (var i = 0; i < res; ++i)
-	{
-		var j = Math.PI*2*i/res;
-		var point = paper_obj.symbol.definition.segments[i].point;
-
-		var initCircle = waveCircleInit.segments[i].point;
-
-		var initX = initCircle.x;
-		var initY = initCircle.y;
-
-		var distSq = ((point.x * point.x) + (point.y * point.y));
-		delta[i] = distSq;
-
-		if(delta[i] > g_r*g_r)
-		{
-			obj.pointSpeed[i] += pointAccelConst;
-			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
-			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
-		}
-		else
-		{
-			point.x = initX;
-			point.y = initY;
-			obj.pointSpeed[i] = 0;
-		}
-	}
-
-	var scale = getScale(paper_obj.position.y);
-
-	paper_obj.matrix.scaleX = scale;
-	paper_obj.matrix.scaleY = scale;
-
-	paper_obj.symbol.definition.smooth();
-}
-
 // Event listeners
-var pushedElement = null;
 var mouseDown = function (e) {
 	console.log("mouseDown: ", e.target);
-
 	pushedElement = e.target;
+	objects[pushedElement.id].isHeld = true;
+	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 };
+
 
 var mouseDrag = function (e) {
 	//console.log("mouseDrag:", e.target)
-	if(pushedElement !== null)
+	if(pushedElement !== null && objects[pushedElement.id] !== undefined)
 	{
 		objects[pushedElement.id].position = e.point;
 		pushedElement.position = e.point;
@@ -280,22 +219,29 @@ var mouseDrag = function (e) {
 	}
 	else
 	{
-		pushedElement = e.target;
+		if(e.target)
+		{
+			pushedElement = e.target;
+		}
 	}
 };
 
 var mouseDownModule = function (e) {
 	// Start preloading audio
-	console.log("mouseDownModule:", e.target)
 	var paper_id = e.target.id;
 	var file_id = modules[paper_id].file_id;
 	var properties = files[modules[paper_id].file_id];
 
 	var moduleColor = Settings.colorForName(file_id);
 
-	pushedElement = placeWaveSymbol(e.point.x, e.point.y, undefined, moduleColor, properties);
-	
+	//var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
+	pushedElement = placeWaveSymbol(e.point.x, e.point.y, getScale(e.point.y), moduleColor, properties);
+	objects[pushedElement.id].isHeld = true;
+
+	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+
 	loadSound(paper_id, pushedElement.id);
+	pushedElement.selected = true;
 };
 
 var mouseUp = function (e) {
@@ -309,6 +255,9 @@ var mouseUp = function (e) {
 		pushedElement = null;
 		return;
 	}
+
+	objects[pushedElement.id].isHeld = false;
+	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 
 	setActiveObjectPan(e);
 	console.log(objects[pushedElement.id]);
@@ -356,7 +305,7 @@ function startActiveObject(scheduled, object)
 	};
 
 	var interval = setInterval( function () {
-		// Try until sound becomes available, then shedule it
+		// Try until sound becomes available, then schedule it
 		// and stop trying
 		if(objects[theId] !== undefined && objects[theId].sound !== undefined)
 		{
@@ -367,7 +316,6 @@ function startActiveObject(scheduled, object)
 
 var mouseUpModule = function () {
 	console.log("mouseUpModule:", e.target);
-	var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
 	console.log("Starting active object: ", placed.id)
 	startActiveObject(true, placed);
 	pushedElement = null;
@@ -382,10 +330,10 @@ function placeWaveSymbol(x, y, scale, color, properties)
 {
 	console.log("placeWaveSymbol");
 	color = color || 'rgb(120, 120, 120)';
+	properties = properties | {};
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	placed.symbol._definition.fillColor = color;
 	pushObject(placed, properties);
-	if(scale !== undefined) placed.scale(scale);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
@@ -396,17 +344,17 @@ function placeWaveSymbol(x, y, scale, color, properties)
 
 function pushObject(paper, properties)
 {
-	console.log("pushObject: ", paper, properties)
 	objects[paper.id] = {
 		paper : paper,
 		properties : properties,
 		hasStarted  : false
-	}
+	};
+	console.log("pushObject: ", objects);
 }
 
 function isOffScreen(pos)
 {
-	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
+	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)
@@ -416,4 +364,82 @@ function placeModuleSymbol(moduleSymbol, x, y)
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUpModule;
 	return placed;
+}
+
+function updateClock(handPoint, clockRatio)
+{
+
+}
+
+var updateWaveCircle = function (event, paper_obj) {
+	var paper_id = paper_obj.id;
+	var obj = objects[paper_id];
+	var sound_obj = objects[paper_id]["sound"];
+	var properties = objects[paper_id]["properties"];
+
+	var amp = properties.amp ? properties.amp : ampConstDefault;
+	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
+
+	if(obj.pointSpeed === undefined)
+	{
+		obj.pointSpeed = [];
+	}
+
+	if(sound_obj !== undefined)
+	{
+		obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
+		obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
+		obj.sound.source.onended = function () { removeSound(paper_id); };
+
+		for(var i = 0; i < res; i++)
+		{
+			var wavePoint = paper_obj.symbol.definition.children[0].segments[i].point;
+			var	freq = sound_obj.fftdata[i];
+			
+			//var freq = 1;
+			var j = Math.PI*2*i/res;
+			wavePoint.x = wavePoint.x + amp * 0.001 * freq * Math.cos(j);
+			wavePoint.y = wavePoint.y + amp * 0.001 * freq * Math.sin(j);
+		}
+	}
+
+	var delta = [];
+	var prevDelta = [];
+
+	for (var i = 0; i < res; ++i)
+	{
+		var j = Math.PI*2*i/res;
+		
+		var point = paper_obj.symbol.definition.children[0].segments[i].point;
+
+		var initCircle = waveCircleInit.segments[i].point;
+
+		var initX = initCircle.x;
+		var initY = initCircle.y;
+
+		var distSq = ((point.x * point.x) + (point.y * point.y));
+		delta[i] = distSq;
+
+		if(delta[i] > g_r*g_r)
+		{
+			obj.pointSpeed[i] += pointAccelConst;
+			point.x -= Math.cos(j) * amp * obj.pointSpeed[i];
+			point.y -= Math.sin(j) * amp * obj.pointSpeed[i];
+		}
+		else
+		{
+			point.x = initX;
+			point.y = initY;
+			obj.pointSpeed[i] = 0;
+		}
+	}
+
+
+	var scale = getScale(obj.paper.position.y);
+
+	paper_obj.matrix.scaleX = scale;
+	paper_obj.matrix.scaleY = scale;
+	
+	paper_obj.symbol.definition.children[0].smooth();
+
 }

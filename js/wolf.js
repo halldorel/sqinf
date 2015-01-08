@@ -4,6 +4,8 @@ var dragSrcEl = null;
 var canvas = document.getElementById("scope");
 var full_path = ''
 var sounds_path = full_path + 'sounds';
+var sampleRate = 44100;
+var pushedElement = null;
 
 for (var i = 0; i < files.length; ++i)
 {
@@ -78,19 +80,19 @@ function positionModules()
 {
 	var module_pos = {};
 	
-	module_pos.cx = 35;
-	module_pos.cy = 35;
+	module_pos.cx = moduleRadius + 10;
+	module_pos.cy = moduleRadius + 10;
 
 	for(var i in modules)
 	{
 		modules[i].paper.position.x = module_pos.cx;
 		modules[i].paper.position.y = module_pos.cy;
-		module_pos.cx += 60;
+		module_pos.cx += moduleRadius * 2 + 10;
 
 		if(module_pos.cx >= cw - 50)
 		{
-			module_pos.cx = 35;
-			module_pos.cy += 60;
+			module_pos.cx = moduleRadius + 10;
+			module_pos.cy += moduleRadius * 2 + 10;
 		}
 	}
 }
@@ -227,8 +229,9 @@ function getYPan(ypos)
 
 function getScale(y)
 {
+	if (y < 200) return 0.625;
 	var scale = 4*(y - 200)/ch;
-	if (scale < 0.05) scale = 0.05;
+	if (scale < 0.1) scale = 0.1;
 	return scale;
 }
 
@@ -258,12 +261,20 @@ sched.schedule();
 
 function removeSound(id)
 {	
-	sched.removeFromBuffer(id);
-	if(objects[id] !== undefined && objects[id].hasStarted == true)
+	if(objects[id] !== undefined)
 	{
-		objects[id].sound.source.stop();
-	}
+		sched.removeFromBuffer(id);
+		if(objects[id] !== undefined && objects[id].hasStarted == true)
+		{
+			objects[id].sound.source.stop();
+		}
 
-	objects[id].paper.remove();
-	delete objects[id];
+		if(objects[id].isHeld)
+		{
+			pushedElement = null;
+		}
+
+		objects[id].paper.remove();
+		delete objects[id];
+	}
 }
