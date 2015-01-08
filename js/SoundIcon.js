@@ -1,6 +1,6 @@
 var updates = 0;
-var g_r = 40;
-var moduleRadius = 20;
+var g_r = 60;
+var moduleRadius = 25;
 var res = 16;
 var ampConstDefault = 10.0;
 var pointAccelConstDefault = 0.010;
@@ -241,7 +241,6 @@ var mouseDownModule = function (e) {
 	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 
 	loadSound(paper_id, pushedElement.id);
-	pushedElement.selected = true;
 };
 
 var mouseUp = function (e) {
@@ -377,6 +376,11 @@ var updateWaveCircle = function (event, paper_obj) {
 	var sound_obj = objects[paper_id]["sound"];
 	var properties = objects[paper_id]["properties"];
 
+	var scale = getScale(obj.paper.position.y);
+
+	obj.paper.matrix.scaleX = scale;
+	obj.paper.matrix.scaleY = scale;
+
 	var amp = properties.amp ? properties.amp : ampConstDefault;
 	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
 
@@ -433,12 +437,6 @@ var updateWaveCircle = function (event, paper_obj) {
 			obj.pointSpeed[i] = 0;
 		}
 	}
-
-
-	var scale = getScale(obj.paper.position.y);
-
-	paper_obj.matrix.scaleX = scale;
-	paper_obj.matrix.scaleY = scale;
 	
 	paper_obj.symbol.definition.children[0].smooth();
 
