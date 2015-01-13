@@ -189,6 +189,10 @@ function startSound(instance_id)
 {
 	var obj = objects[instance_id].sound;
 	objects[instance_id].hasStarted = true;
+	var soundLength = obj.source.buffer.duration;
+
+
+	objects[instance_id].degreesPerOptimalFrame = 6/soundLength;
 	obj.source.start(0);
 }
 
@@ -274,7 +278,9 @@ function removeSound(id)
 			pushedElement = null;
 		}
 
+		objects[id].paper.symbol.definition.children = [];
 		objects[id].paper.remove();
+
 		delete objects[id];
 	}
 }

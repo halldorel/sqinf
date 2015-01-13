@@ -15,7 +15,7 @@ var wave = new paper.Path({
 
 var waveCircle = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 0),
-	strokeWidth: 0, 
+	strokeWidth: 0,
 	strokeCap: 'square'
 });
 
@@ -27,7 +27,7 @@ var clockPath = new paper.Path({
 clockPath.add(new paper.Point(0, 0));
 clockPath.add(new paper.Point(0, -g_r));
 
-var waveCircleGroup = new paper.Group([waveCircle, clockPath]);
+var waveCircleGroup = new paper.Group(waveCircle);
 
 var waveCircleInit = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 0),
@@ -52,7 +52,6 @@ for(var i = 0; i < res; ++i)
 
 waveCircle.closed = true;
 waveCircle.smooth();
-waveCircle.fillColor = 'rgba(0, 220, 220, 1)';
 
 var waveCircleSymbol = new paper.Symbol(waveCircleGroup);
 
@@ -207,7 +206,6 @@ var mouseDown = function (e) {
 	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 };
 
-
 var mouseDrag = function (e) {
 	//console.log("mouseDrag:", e.target)
 	if(pushedElement !== null && objects[pushedElement.id] !== undefined)
@@ -234,7 +232,6 @@ var mouseDownModule = function (e) {
 
 	var moduleColor = Settings.colorForName(file_id);
 
-	//var placed = placeWaveSymbol(pushedElement.position.x, pushedElement.position.y);
 	pushedElement = placeWaveSymbol(e.point.x, e.point.y, getScale(e.point.y), moduleColor, properties);
 	objects[pushedElement.id].isHeld = true;
 
@@ -331,8 +328,17 @@ function placeWaveSymbol(x, y, scale, color, properties)
 	color = color || 'rgb(120, 120, 120)';
 	properties = properties | {};
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
-	placed.symbol._definition.fillColor = color;
-	pushObject(placed, properties);
+	var hvadErKlukkan = clock(0, 0, g_r, 1);
+	placed.symbol.definition.children[1] = hvadErKlukkan[0];
+	//placed.symbol.definition.children[0].fillColor = color;
+	//placed.symbol.definition.children[0].clipMask = true;
+	placed.symbol.definition._clipItem = placed.symbol.definition.children[0];
+
+	hvadErKlukkan[0].remove();
+
+//debugger;
+	//placed.symbol.definition.clipped = true;
+	pushObject(placed, properties, hvadErKlukkan);
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
@@ -341,12 +347,13 @@ function placeWaveSymbol(x, y, scale, color, properties)
 	return placed;
 }
 
-function pushObject(paper, properties)
+function pushObject(paper, properties, clock)
 {
 	objects[paper.id] = {
 		paper : paper,
 		properties : properties,
-		hasStarted  : false
+		hasStarted  : false,
+		clock : clock
 	};
 	console.log("pushObject: ", objects);
 }
@@ -365,12 +372,9 @@ function placeModuleSymbol(moduleSymbol, x, y)
 	return placed;
 }
 
-function updateClock(handPoint, clockRatio)
-{
-
-}
-
 var updateWaveCircle = function (event, paper_obj) {
+	if(paper_obj == null) console.log("paper object null");
+	if(paper_obj.id == null) console.log("paper object id null");
 	var paper_id = paper_obj.id;
 	var obj = objects[paper_id];
 	var sound_obj = objects[paper_id]["sound"];
@@ -380,6 +384,11 @@ var updateWaveCircle = function (event, paper_obj) {
 
 	obj.paper.matrix.scaleX = scale;
 	obj.paper.matrix.scaleY = scale;
+/*
+	obj.paper.symbol.definition.matrix.scaleX = scale;
+	obj.paper.symbol.definition.matrix.scaleY = scale;
+*/
+	//obj.paper.selected = true;
 
 	var amp = properties.amp ? properties.amp : ampConstDefault;
 	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
@@ -405,6 +414,9 @@ var updateWaveCircle = function (event, paper_obj) {
 			wavePoint.x = wavePoint.x + amp * 0.001 * freq * Math.cos(j);
 			wavePoint.y = wavePoint.y + amp * 0.001 * freq * Math.sin(j);
 		}
+
+		// Ticks the clock at a given speed
+		if(obj.hasStarted) obj.clock[1](obj.degreesPerOptimalFrame * (1 + event.delta));
 	}
 
 	var delta = [];
@@ -439,5 +451,4 @@ var updateWaveCircle = function (event, paper_obj) {
 	}
 	
 	paper_obj.symbol.definition.children[0].smooth();
-
 }

@@ -2,9 +2,9 @@
 var SLOWEST_BPM = 40;
 
 var colors = {
-	"green" : "0, 255, 0",
-	"red"	: "255, 0, 0",
-	"blue"	: "0, 0, 255",
+	"green" : "12, 180, 180",
+	"red"	: "250, 103, 100",
+	"blue"	: "100, 80, 200",
 	"lime"	: "122, 122, 80"
 }
 
@@ -106,14 +106,14 @@ var files = [
 	{
 		"name" 	: "Slow Crescendo 2.mp3",
 		"speed" : 40,
-		"color"	: "",
+		"color"	: "red",
 		"amp"	: 10.0,
 		"accel" : 0.013
 	},
 	{
 		"name" 	: "Slow Crescendo 3.mp3",
 		"speed" : 40,
-		"color"	: "",
+		"color"	: "green",
 		"amp"	: 10.0,
 		"accel" : 0.010
 	},
