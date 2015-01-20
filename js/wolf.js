@@ -104,7 +104,7 @@ function setupInitialLayout()
 	for(var i = 0; i < files.length; ++i)
 	{	
 		// Read module color if defined, else use gray
-		var moduleColor = Settings.colorForName(i);
+		var moduleColor = Settings.colorsForIndex(i)[0];
 		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
 		
 		ModuleManager.addModuleWithKeyAndIndex(i, placed);
@@ -257,7 +257,7 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(2*pan.x - 1, 0, getYPan(pan.y));//  Math.sin(pan.x * Math.PI));
+		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));//getYPan(pan.y));//
 	}
 }
 

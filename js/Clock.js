@@ -1,12 +1,9 @@
-function clock(x, y, r, speed, firstColor, secondColor)
+function clock(x, y, r, speed, secondColor, firstColor)
 {
     var firstColor = firstColor || '#ff0192';
     var secondColor = secondColor || '#9201ff';
 
     r = r * 2;
-    
-
-//debugger;
 
     var backgroundCircle = new paper.Path.Circle(x, y, r);
     backgroundCircle.fillColor = secondColor;
@@ -15,7 +12,6 @@ function clock(x, y, r, speed, firstColor, secondColor)
 
     var pieSymbol = new paper.Symbol(pie);
     var backgroundCircleSymbol = new paper.Symbol(backgroundCircle);
-    
 
     var degrees = 0;
     var alter = false;
@@ -57,7 +53,7 @@ function clock(x, y, r, speed, firstColor, secondColor)
         return segments;
     }
 
-    var updateClock = function(speed) 
+    var updateClock = function(speed, isInfinite) 
     {
         if(degrees == 359)
         {
@@ -70,7 +66,18 @@ function clock(x, y, r, speed, firstColor, secondColor)
         degrees = degrees + speed;
         
         pie.fillColor = alter ? secondColor : firstColor;
-        pie.segments = generatePieSegmentsForAngle(degrees, alter ? secondColor : firstColor);
+
+        if(isInfinite)
+        {
+            pie.segments = generatePieSegmentsForAngle(180, alter ? secondColor : firstColor);
+            pie.matrix.rotation = degrees;
+            pie.matrix.rotate(speed);
+        }
+        else
+        {
+            pie.segments = generatePieSegmentsForAngle(degrees, alter ? secondColor : firstColor);
+            pie.matrix.rotation = 0;
+        }
     }
 
     return [new paper.Group(backgroundCircle, pie), updateClock];

@@ -460,6 +460,7 @@ var Settings = (function()
 	}
 
 	return {
-		colorForName : _colorForName
+		colorForName : _colorForName,
+		colorsForIndex: _colorsForIndex
 	};
 })();
