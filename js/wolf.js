@@ -225,10 +225,11 @@ function getXPan(xpos)
 
 function getYPan(ypos)
 {
-	var height = ch;
-	var temp = 1-(ypos/height);
-	var pan = temp * 10;
-	return pan;
+	var y = ypos - 200;
+	var canvasHeight = ch-200;
+	var pan = 1 - (y / canvasHeight);
+	console.log("Pan: ", pan * 10);
+	return pan * 10;
 }
 
 function getScale(y)
@@ -256,7 +257,7 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));
+		obj.sound.panner.setPosition(2*pan.x - 1, 0, getYPan(pan.y));//  Math.sin(pan.x * Math.PI));
 	}
 }
 
@@ -270,7 +271,7 @@ function removeSound(id)
 		sched.removeFromBuffer(id);
 		if(objects[id] !== undefined && objects[id].hasStarted == true)
 		{
-			objects[id].sound.source.stop();
+			objects[id].sound.source.stop(0);
 		}
 
 		if(objects[id].isHeld)

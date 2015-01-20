@@ -388,12 +388,75 @@ var files = [
 	}
 ];
 
+var orderedColors = [
+	["#E2D300", "#0000AA"],
+	["#284020", "#FF4800"],
+	["#A0968C", "#FF4800"],
+	["#0000AA", "#FF4800"],
+	["#00D6A1", "#FF4800"],
+	["#F4EFA1", "#00D6A1"],
+	["#0000AA", "#E8AE7C"],
+	["#00D6A1", "#CAE1D0"],
+	["#F4EFA1", "#599C00"],
+	["#E2D300", "#CAE1D0"],
+	["#960049", "#353017"],
+	["#CAE1D0", "#0000AA"],
+	["#E2D300", "#FF4800"],
+	["#FF4800", "#AD831E"],
+	["#AD831E", "#E2D300"],
+	["#284020", "#A0968C"],
+	["#284020", "#EBB770"],
+	["#A0968C", "#AD831E"],
+	["#E8AE7C", "#00D6A1"],
+	["#E2D300", "#960049"],
+	["#E2D300", "#00D6A1"],
+	["#FF4800", "#750002"],
+	["#AD831E", "#CAE1D0"],
+	["#750002", "#284020"],
+	["#CAE1D0", "#A0968C"],
+	["#AD831E", "#CAE1D0"],
+	["#AD831E", "#284020"],
+	["#E8AE7C", "#284020"],
+	["#00D6A1", "#AD831E"],
+	["#E8AE7C", "#F4EFA1"],
+	["#960049", "#AD831E"],
+	["#599C00", "#960049"],
+	["#CAE1D0", "#AD831E"],
+	["#E2D300", "#A0968C"],
+	["#CAE1D0", "#FF4800"],
+	["#FF4800", "#960049"],
+	["#960049", "#323031"],
+	["#0000AA", "#284020"],
+	["#00D6A1", "#0000AA"],
+	["#00D6A1", "#960049"],
+	["#FF4800", "#599C00"],
+	["#750002", "#599C00"],
+	["#E8AE7C", "#750002"],
+	["#750002", "#AD831E"],
+	["#0000AA", "#A0968C"],
+	["#F4EFA1", "#CAE1D0"],
+	["#E2D300", "#E8AE7C"],
+	["#E8AE7C", "#A0968C"],
+	["#A0968C", "#00D6A1"],
+	["#E2D300", "#284020"],
+	["#CAE1D0", "#750002"],
+	["#599C00", "#A0968C"],
+	["#AD831E", "#E8AE7C"]
+];
+
 var Settings = (function()
 {
 	var _colorForName = function(file_id)
 	{
 		return moduleColor = (files[file_id]["color"] !== undefined) ?
 		'rgb(' + colors[files[file_id]["color"]] + ')' : 'rgb(120, 120, 120)';
+	}
+
+	var _colorsForIndex = function(index)
+	{
+		if(orderedColors[index]) return orderedColors[index];
+		console.log("Warning: Color index out of bounds.");
+		return "#FF0000";
 	}
 
 	return {
