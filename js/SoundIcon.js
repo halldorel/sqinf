@@ -166,7 +166,7 @@ function clearGrid()
 
 function createModuleSymbol(moduleColor, secondModuleColor)
 {
-	var moduleClock = clock(0, 0, moduleRadius/2, 0, secondModuleColor, moduleColor);
+	var moduleClock = clock(0, 0, moduleRadius/2, 0, moduleColor, secondModuleColor);
 	moduleClock[1](180);
 
 	var moduleSymbol = new paper.Symbol(moduleClock[0]);
