@@ -5,6 +5,7 @@ function Scheduler(tempo)
 	var _handler;
 	var _interval = (60/tempo) * 1000;
 	var _scheduleBuffer = [];
+	var _handlers = {};
 
 	function _queue(theId)
 	{
@@ -35,9 +36,11 @@ function Scheduler(tempo)
 		_handler = setInterval(_callback, _interval);
 	}
 
-	function _deschedule()
+	function _deschedule(handlerIndex)
 	{
-		clearInterval(_handler);
+		if(_handlers[handlerIndex] !== undefined) {
+			delete _handlers[_handlerIndex];
+		}
 	}
 
 	function _removeFromBuffer(id)

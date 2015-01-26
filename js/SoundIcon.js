@@ -314,10 +314,10 @@ function startActiveObject(scheduled, object)
 }
 
 var mouseUpModule = function () {
-	if(DEBUG) console.log("mouseUpModule:", e.target);
+	/*if(DEBUG) console.log("mouseUpModule:", e.target);
 	if(DEBUG) console.log("Starting active object: ", placed.objectIndex)
-	startActiveObject(true, placed);
-	pushedElement = null;
+	//startActiveObject(true, placed);
+	pushedElement = null;*/
 };
 
 // Helper functions
@@ -359,6 +359,7 @@ function pushObject(paper, properties, clock)
 		hasStarted  : false,
 		clock : clock
 	};
+	
 	if(DEBUG) console.log("pushObject: ", objects);
 }
 
@@ -406,7 +407,8 @@ var updateWaveCircle = function (event, paper_obj) {
 	{
 		obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 		obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-		obj.sound.source.onended = function () { removeSound(objectIndex); };
+		obj.sound.source.onended = function () { if(objects[objectIndex] !== undefined) objects[objectIndex].paper.remove(); };
+		obj.sound.ontimeupdate = function (e) { console.log(e); };
 
 		for(var i = 0; i < res; i++)
 		{

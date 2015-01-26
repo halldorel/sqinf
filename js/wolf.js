@@ -190,10 +190,10 @@ function loadSound(paper_id, instance_id)
 
 function startSound(instance_id)
 {
+	if(objects[instance_id] === undefined) return;
 	var obj = objects[instance_id].sound;
 	objects[instance_id].hasStarted = true;
 	var soundLength = obj.source.buffer.duration;
-
 
 	objects[instance_id].degreesPerOptimalFrame = 6/soundLength;
 	obj.source.start(0);
@@ -269,6 +269,7 @@ sched.schedule();
 
 function removeSound(id)
 {	
+	console.log("will remove sound ", id);
 	if(objects[id] !== undefined)
 	{
 		sched.removeFromBuffer(id);
@@ -283,7 +284,7 @@ function removeSound(id)
 		}
 
 		objects[id].paper.symbol.definition.children = [];
-		objects[id].paper.remove();
+		//objects[id].paper.remove();
 
 		delete objects[id];
 	}
