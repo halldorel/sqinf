@@ -26,6 +26,8 @@ var objects = {};
 // Global vars
 var windowPadding = 0;
 
+var DEBUG = false;
+
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
 var _cw = cw;
@@ -181,7 +183,7 @@ function loadSound(paper_id, instance_id)
     }
     else
     {
-    	console.log("yes:", objects[paper_id]);
+    	if(DEBUG) console.log("yes:", objects[paper_id]);
     }
 }
 
@@ -198,7 +200,7 @@ function startSound(instance_id)
 
 function onError()
 {
-	console.log("Error loading sound ");
+	if(DEBUG) console.log("Error loading sound ");
 }
 
 
@@ -209,7 +211,7 @@ function toggleLoop(e)
 	{
 		objects[id].sound.source.loop = !objects[id].sound.source.loop;
 		objects[id].loop = !objects[id].loop;
-		console.log("Set loop to " + objects[id].sound.source.loop + " for object with id " + id);
+		if(DEBUG) console.log("Set loop to " + objects[id].sound.source.loop + " for object with id " + id);
 	}
 }
 
@@ -228,7 +230,7 @@ function getYPan(ypos)
 	var y = ypos - 200;
 	var canvasHeight = ch-200;
 	var pan = 1 - (y / canvasHeight);
-	console.log("Pan: ", pan * 10);
+	if(DEBUG) console.log("Pan: ", pan * 10);
 	return pan * 10;
 }
 

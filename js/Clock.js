@@ -1,7 +1,7 @@
 function clock(x, y, r, speed, secondColor, firstColor)
 {
-    var firstColor = firstColor || '#ff0192';
-    var secondColor = secondColor || '#9201ff';
+    var firstColor = firstColor || '#ff0192';
+    var secondColor = secondColor || '#9201ff';
 
     r = r * 2;
 
@@ -66,19 +66,24 @@ function clock(x, y, r, speed, secondColor, firstColor)
         degrees = degrees + speed;
         
         pie.fillColor = alter ? secondColor : firstColor;
-
+		
         if(isInfinite)
         {
-            pie.segments = generatePieSegmentsForAngle(180, alter ? secondColor : firstColor);
+            pie.segments = generatePieSegmentsForAngle(180, alter);
             pie.matrix.rotation = degrees;
-            pie.matrix.rotate(speed);
         }
         else
         {
-            pie.segments = generatePieSegmentsForAngle(degrees, alter ? secondColor : firstColor);
+            pie.segments = generatePieSegmentsForAngle(degrees, alter);
             pie.matrix.rotation = 0;
         }
     }
+	
+	var setClockTo = function(degrees)
+	{
+		degrees = degrees % 360;
+        pie.segments = generatePieSegmentsForAngle(degrees);
+	}
 
-    return [new paper.Group(backgroundCircle, pie), updateClock];
+    return [new paper.Group(backgroundCircle, pie), updateClock, setClockTo];
 }

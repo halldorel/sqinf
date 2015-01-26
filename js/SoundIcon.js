@@ -22,7 +22,8 @@ var waveCircle = new paper.Path({
 var clockPath = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 1),
 	strokeWidth: 2, 
-	strokeCap: 'square'});
+	strokeCap: 'square'
+});
 
 clockPath.add(new paper.Point(0, 0));
 clockPath.add(new paper.Point(0, -g_r));
@@ -165,6 +166,8 @@ function clearGrid()
 
 function createModuleSymbol(moduleColor)
 {
+	var moduleClock = clock()
+	
 	var modulePath = new paper.Path.Circle({
 		center: [0, 0],
 		radius: moduleRadius,
@@ -200,14 +203,13 @@ wave.onFrame = function (event)
 
 // Event listeners
 var mouseDown = function (e) {
-	console.log("mouseDown: ", e.target);
+	if(DEBUG) console.log("mouseDown: ", e.target);
 	pushedElement = e.target;
 	objects[pushedElement.id].isHeld = true;
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 };
 
 var mouseDrag = function (e) {
-	//console.log("mouseDrag:", e.target)
 	if(pushedElement !== null && objects[pushedElement.id] !== undefined)
 	{
 		objects[pushedElement.id].position = e.point;
@@ -236,28 +238,28 @@ var mouseDownModule = function (e) {
 	pushedElement = placeWaveSymbol(e.point.x, e.point.y, getScale(e.point.y), moduleColor, properties, secondColor);
 	objects[pushedElement.id].isHeld = true;
 
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 
 	loadSound(paper_id, pushedElement.id);
 };
 
 var mouseUp = function (e) {
-	console.log("mouseUp:", e.target);
+	if(DEBUG) console.log("mouseUp:", e.target);
 	startActiveObject(true, pushedElement);
 	
 	if(isOffScreen(pushedElement.position))
 	{
-		console.log("Removed sound", pushedElement.id)
+		if(DEBUG) console.log("Removed sound", pushedElement.id)
 		removeSound(pushedElement.id);
 		pushedElement = null;
 		return;
 	}
 
 	objects[pushedElement.id].isHeld = false;
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
 
 	setActiveObjectPan(e);
-	console.log(objects[pushedElement.id]);
+	if(DEBUG) console.log(objects[pushedElement.id]);
 	pushedElement = null;
 };
 
@@ -282,7 +284,7 @@ function setActiveObjectPan(e)
 
 function startActiveObject(scheduled, object)
 {
-	console.log("startActiveObject scheduled:", scheduled, " object:", object);
+	if(DEBUG) console.log("startActiveObject scheduled:", scheduled, " object:", object);
 	var scheduled = scheduled || false;
 
 	var theId = object.id;
@@ -291,14 +293,14 @@ function startActiveObject(scheduled, object)
 		return;
 
 	var startClipNowAndStopTrying = function () {
-		console.log(theId, " has started : ", objects[theId].hasStarted);
+		if(DEBUG) console.log(theId, " has started : ", objects[theId].hasStarted);
 		if(scheduled && objects[theId].hasStarted === false)
 		{
 			sched.queue(theId);
 		}
 
 		clearInterval(interval);
-		console.log("Cleared interval")
+		if(DEBUG) console.log("Cleared interval")
 	};
 
 	var interval = setInterval( function () {
@@ -312,8 +314,8 @@ function startActiveObject(scheduled, object)
 }
 
 var mouseUpModule = function () {
-	console.log("mouseUpModule:", e.target);
-	console.log("Starting active object: ", placed.id)
+	if(DEBUG) console.log("mouseUpModule:", e.target);
+	if(DEBUG) console.log("Starting active object: ", placed.id)
 	startActiveObject(true, placed);
 	pushedElement = null;
 };
@@ -325,7 +327,7 @@ function waveFunc (x) {
 
 function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 {
-	console.log("placeWaveSymbol");
+	if(DEBUG) console.log("placeWaveSymbol");
 	color = color || 'rgb(120, 120, 120)';
 	secondColor = secondColor || 'rgb(120, 0, 0)';
 	properties = properties | {};
@@ -354,7 +356,7 @@ function pushObject(paper, properties, clock)
 		hasStarted  : false,
 		clock : clock
 	};
-	console.log("pushObject: ", objects);
+	if(DEBUG) console.log("pushObject: ", objects);
 }
 
 function isOffScreen(pos)
@@ -372,8 +374,8 @@ function placeModuleSymbol(moduleSymbol, x, y)
 }
 
 var updateWaveCircle = function (event, paper_obj) {
-	if(paper_obj == null) console.log("paper object null");
-	if(paper_obj.id == null) console.log("paper object id null");
+	if(paper_obj == null && DEBUG) console.log("paper object null");
+	if(paper_obj.id == null && DEBUG) console.log("paper object id null");
 	var paper_id = paper_obj.id;
 	var obj = objects[paper_id];
 	var sound_obj = objects[paper_id]["sound"];
