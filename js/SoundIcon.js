@@ -164,18 +164,12 @@ function clearGrid()
 	removeAllFromArray(linePathsHz);
 }
 
-function createModuleSymbol(moduleColor)
+function createModuleSymbol(moduleColor, secondModuleColor)
 {
-	var moduleClock = clock()
-	
-	var modulePath = new paper.Path.Circle({
-		center: [0, 0],
-		radius: moduleRadius,
-		strokeWidth : 0,
-		fillColor: moduleColor
-	});
+	var moduleClock = clock(0, 0, moduleRadius/2, 0, secondModuleColor, moduleColor);
+	moduleClock[1](180);
 
-	var moduleSymbol = new paper.Symbol(modulePath);
+	var moduleSymbol = new paper.Symbol(moduleClock[0]);
 	return moduleSymbol;
 }
 function smoothen(x)
@@ -285,7 +279,7 @@ function setActiveObjectPan(e)
 function startActiveObject(scheduled, object)
 {
 	if(DEBUG) console.log("startActiveObject scheduled:", scheduled, " object:", object);
-	var scheduled = scheduled || false;
+	var scheduled = scheduled || false;
 
 	var theId = object.id;
 
@@ -329,7 +323,7 @@ function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 {
 	if(DEBUG) console.log("placeWaveSymbol");
 	color = color || 'rgb(120, 120, 120)';
-	secondColor = secondColor || 'rgb(120, 0, 0)';
+	secondColor = secondColor || 'rgb(120, 0, 0)';
 	properties = properties | {};
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	var hvadErKlukkan = clock(0, 0, g_r, 1, color, secondColor);
@@ -361,7 +355,7 @@ function pushObject(paper, properties, clock)
 
 function isOffScreen(pos)
 {
-	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
+	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)
@@ -373,7 +367,7 @@ function placeModuleSymbol(moduleSymbol, x, y)
 	return placed;
 }
 
-var updateWaveCircle = function (event, paper_obj) {
+var updateWaveCircle = function (event, paper_obj) {
 	if(paper_obj == null && DEBUG) console.log("paper object null");
 	if(paper_obj.id == null && DEBUG) console.log("paper object id null");
 	var paper_id = paper_obj.id;
@@ -391,7 +385,7 @@ var updateWaveCircle = function (event, paper_obj) {
 */
 	//obj.paper.selected = true;
 
-	var amp = properties.amp ? properties.amp : ampConstDefault;
+	var amp = properties.amp ? properties.amp : ampConstDefault;
 	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
 
 	if(obj.pointSpeed === undefined)

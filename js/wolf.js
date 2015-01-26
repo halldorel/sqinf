@@ -105,9 +105,9 @@ function setupInitialLayout()
 {
 	for(var i = 0; i < files.length; ++i)
 	{	
-		// Read module color if defined, else use gray
 		var moduleColor = Settings.colorsForIndex(i)[0];
-		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
+		var secondModuleColor = Settings.colorsForIndex(i)[1];
+		var placed = placeModuleSymbol(createModuleSymbol(moduleColor, secondModuleColor), 0, 0);
 		
 		ModuleManager.addModuleWithKeyAndIndex(i, placed);
 
