@@ -157,8 +157,7 @@ function loadSound(paper_id, instance_id)
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 
-    	    	if(sound.buffer == null)
-		        {
+    	    	if(sound.buffer == null) {
 		        	sound.buffer = buffer;
 		        }
 	
@@ -168,8 +167,13 @@ function loadSound(paper_id, instance_id)
     			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
     			sound.panner.connect(a_ctx.destination);
-
-    			objects[instance_id].sound = sound;
+				
+				sound.source.onended = function () { removeSound(instance_id); console.log("onended removes sound ", instance_id); };
+				//sound.source.context.ontimeupdate = function (e) { console.log(e); };
+				
+				// In case item is deleted before the MP3 data is loaded
+				if(objects[instance_id] !== undefined)
+    				objects[instance_id].sound = sound;
     			
     	    }, onError);
     	};
@@ -203,7 +207,6 @@ function onError()
 {
 	if(DEBUG) console.log("Error loading sound ");
 }
-
 
 function toggleLoop(e)
 {
@@ -272,6 +275,7 @@ function removeSound(id)
 	console.log("will remove sound ", id);
 	if(objects[id] !== undefined)
 	{
+		console.log("is not undefined ", id)
 		sched.removeFromBuffer(id);
 		if(objects[id] !== undefined && objects[id].hasStarted == true)
 		{
@@ -284,7 +288,6 @@ function removeSound(id)
 		}
 
 		objects[id].paper.symbol.definition.children = [];
-		//objects[id].paper.remove();
 
 		delete objects[id];
 	}

@@ -47,6 +47,7 @@ function Scheduler(tempo)
 	{
 		if(_scheduleBuffer[id] !== undefined)
 		{
+			debugger;
 			delete _scheduleBuffer[id];
 		}
 	}

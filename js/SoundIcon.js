@@ -407,8 +407,6 @@ var updateWaveCircle = function (event, paper_obj) {
 	{
 		obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 		obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-		obj.sound.source.onended = function () { if(objects[objectIndex] !== undefined) objects[objectIndex].paper.remove(); };
-		obj.sound.ontimeupdate = function (e) { console.log(e); };
 
 		for(var i = 0; i < res; i++)
 		{
