@@ -22,7 +22,8 @@ var waveCircle = new paper.Path({
 var clockPath = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 1),
 	strokeWidth: 2, 
-	strokeCap: 'square'});
+	strokeCap: 'square'
+});
 
 clockPath.add(new paper.Point(0, 0));
 clockPath.add(new paper.Point(0, -g_r));
@@ -163,16 +164,12 @@ function clearGrid()
 	removeAllFromArray(linePathsHz);
 }
 
-function createModuleSymbol(moduleColor)
+function createModuleSymbol(moduleColor, secondModuleColor)
 {
-	var modulePath = new paper.Path.Circle({
-		center: [0, 0],
-		radius: moduleRadius,
-		strokeWidth : 0,
-		fillColor: moduleColor
-	});
+	var moduleClock = clock(0, 0, moduleRadius/2, 0, moduleColor, secondModuleColor);
+	moduleClock[1](180);
 
-	var moduleSymbol = new paper.Symbol(modulePath);
+	var moduleSymbol = new paper.Symbol(moduleClock[0]);
 	return moduleSymbol;
 }
 function smoothen(x)
@@ -200,17 +197,18 @@ wave.onFrame = function (event)
 
 // Event listeners
 var mouseDown = function (e) {
-	console.log("mouseDown: ", e.target);
+	var objectIndex = e.target.objectIndex;
+	if(DEBUG) console.log("mouseDown: ", e.target);
 	pushedElement = e.target;
-	objects[pushedElement.id].isHeld = true;
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	objects[pushedElement.objectIndex].isHeld = true;
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 };
 
 var mouseDrag = function (e) {
-	//console.log("mouseDrag:", e.target)
-	if(pushedElement !== null && objects[pushedElement.id] !== undefined)
+	if(pushedElement !== null && objects[pushedElement.objectIndex] !== undefined)
 	{
-		objects[pushedElement.id].position = e.point;
+		var objectIndex = pushedElement.objectIndex;
+		objects[objectIndex].position = e.point;
 		pushedElement.position = e.point;
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
@@ -232,32 +230,35 @@ var mouseDownModule = function (e) {
 
 	var moduleColor = Settings.colorsForIndex(file_id)[0];
 	var secondColor = Settings.colorsForIndex(file_id)[1];
-
+	
 	pushedElement = placeWaveSymbol(e.point.x, e.point.y, getScale(e.point.y), moduleColor, properties, secondColor);
-	objects[pushedElement.id].isHeld = true;
+	
+	var objectIndex = pushedElement.objectIndex;
+	objects[objectIndex].isHeld = true;
 
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
-	loadSound(paper_id, pushedElement.id);
+	loadSound(paper_id, objectIndex);
 };
 
 var mouseUp = function (e) {
-	console.log("mouseUp:", e.target);
+	var objectIndex = pushedElement.objectIndex;
+	if(DEBUG) console.log("mouseUp:", e.target);
 	startActiveObject(true, pushedElement);
 	
 	if(isOffScreen(pushedElement.position))
 	{
-		console.log("Removed sound", pushedElement.id)
-		removeSound(pushedElement.id);
+		if(DEBUG) console.log("Removed sound", objectIndex)
+		removeSound(objectIndex);
 		pushedElement = null;
 		return;
 	}
 
-	objects[pushedElement.id].isHeld = false;
-	console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	objects[objectIndex].isHeld = false;
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
 	setActiveObjectPan(e);
-	console.log(objects[pushedElement.id]);
+	if(DEBUG) console.log(objects[objectIndex]);
 	pushedElement = null;
 };
 
@@ -268,43 +269,44 @@ var doubleClick = function (e) {
 function correctStackingOrder(e)
 {
 	waveCircleLayer.children.sort(function (a, b) {
-		return a.position.y >= b.position.y;
+		return a.position.y - b.position.y;
 	});
 }
 
 function setActiveObjectPan(e) 
 {
+	var objectIndex = pushedElement.objectIndex;
 	if(pushedElement !== null)
 	{
-		changePan(pushedElement.id, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
+		changePan(objectIndex, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
 	}
 }
 
 function startActiveObject(scheduled, object)
 {
-	console.log("startActiveObject scheduled:", scheduled, " object:", object);
-	var scheduled = scheduled || false;
+	if(DEBUG) console.log("startActiveObject scheduled:", scheduled, " object:", object);
+	var scheduled = scheduled || false;
 
-	var theId = object.id;
+	var objectIndex = object.objectIndex;
 
-	if (objects[theId].hasStarted === true)
+	if (objects[objectIndex].hasStarted === true)
 		return;
 
 	var startClipNowAndStopTrying = function () {
-		console.log(theId, " has started : ", objects[theId].hasStarted);
-		if(scheduled && objects[theId].hasStarted === false)
+		if(DEBUG) console.log(objectIndex, " has started : ", objects[objectIndex].hasStarted);
+		if(scheduled && objects[objectIndex].hasStarted === false)
 		{
-			sched.queue(theId);
+			sched.queue(objectIndex);
 		}
 
 		clearInterval(interval);
-		console.log("Cleared interval")
+		if(DEBUG) console.log("Cleared interval")
 	};
 
 	var interval = setInterval( function () {
 		// Try until sound becomes available, then schedule it
 		// and stop trying
-		if(objects[theId] !== undefined && objects[theId].sound !== undefined)
+		if(objects[objectIndex] !== undefined && objects[objectIndex].sound !== undefined)
 		{
 			startClipNowAndStopTrying();
 		}
@@ -312,10 +314,10 @@ function startActiveObject(scheduled, object)
 }
 
 var mouseUpModule = function () {
-	console.log("mouseUpModule:", e.target);
-	console.log("Starting active object: ", placed.id)
-	startActiveObject(true, placed);
-	pushedElement = null;
+	/*if(DEBUG) console.log("mouseUpModule:", e.target);
+	if(DEBUG) console.log("Starting active object: ", placed.objectIndex)
+	//startActiveObject(true, placed);
+	pushedElement = null;*/
 };
 
 // Helper functions
@@ -325,9 +327,9 @@ function waveFunc (x) {
 
 function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 {
-	console.log("placeWaveSymbol");
+	if(DEBUG) console.log("placeWaveSymbol");
 	color = color || 'rgb(120, 120, 120)';
-	secondColor = secondColor || 'rgb(120, 0, 0)';
+	secondColor = secondColor || 'rgb(120, 0, 0)';
 	properties = properties | {};
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	var hvadErKlukkan = clock(0, 0, g_r, 1, color, secondColor);
@@ -342,24 +344,28 @@ function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
 	placed.onDoubleClick = doubleClick;
-	placed.onUpdate = updateWaveCircle;
+	//placed.onUpdate = updateWaveCircle;
 	return placed;
 }
 
+var g_objectIndex = 0;
 function pushObject(paper, properties, clock)
 {
-	objects[paper.id] = {
+	paper.objectIndex = g_objectIndex;
+	
+	objects[g_objectIndex++] = {
 		paper : paper,
 		properties : properties,
 		hasStarted  : false,
 		clock : clock
 	};
-	console.log("pushObject: ", objects);
+	
+	if(DEBUG) console.log("pushObject: ", objects);
 }
 
 function isOffScreen(pos)
 {
-	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
+	return (pos.x > cw) || (pos.x < 0) || (pos.y > ch) || (pos.y < 200);
 }
 
 function placeModuleSymbol(moduleSymbol, x, y)
@@ -371,13 +377,13 @@ function placeModuleSymbol(moduleSymbol, x, y)
 	return placed;
 }
 
-var updateWaveCircle = function (event, paper_obj) {
-	if(paper_obj == null) console.log("paper object null");
-	if(paper_obj.id == null) console.log("paper object id null");
-	var paper_id = paper_obj.id;
-	var obj = objects[paper_id];
-	var sound_obj = objects[paper_id]["sound"];
-	var properties = objects[paper_id]["properties"];
+var updateWaveCircle = function (event, paper_obj) {
+	if(paper_obj == null && DEBUG) console.log("paper object null");
+	if(paper_obj.objectIndex == null && DEBUG) console.log("paper object id null");
+	var objectIndex = paper_obj.objectIndex;
+	var obj = objects[objectIndex];
+	var sound_obj = obj["sound"];
+	var properties = obj["properties"];
 
 	var scale = getScale(obj.paper.position.y);
 
@@ -389,7 +395,7 @@ var updateWaveCircle = function (event, paper_obj) {
 */
 	//obj.paper.selected = true;
 
-	var amp = properties.amp ? properties.amp : ampConstDefault;
+	var amp = properties.amp ? properties.amp : ampConstDefault;
 	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
 
 	if(obj.pointSpeed === undefined)
@@ -401,7 +407,6 @@ var updateWaveCircle = function (event, paper_obj) {
 	{
 		obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 		obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-		obj.sound.source.onended = function () { removeSound(paper_id); };
 
 		for(var i = 0; i < res; i++)
 		{

@@ -6,6 +6,7 @@ var full_path = ''
 var sounds_path = full_path + 'sounds';
 var sampleRate = 44100;
 var pushedElement = null;
+var g_attenuation = 5;
 
 for (var i = 0; i < files.length; ++i)
 {
@@ -25,6 +26,8 @@ var objects = {};
 
 // Global vars
 var windowPadding = 0;
+
+var DEBUG = false;
 
 var cw = document.body.clientWidth;
 var ch = document.body.clientHeight;
@@ -103,9 +106,9 @@ function setupInitialLayout()
 {
 	for(var i = 0; i < files.length; ++i)
 	{	
-		// Read module color if defined, else use gray
 		var moduleColor = Settings.colorsForIndex(i)[0];
-		var placed = placeModuleSymbol(createModuleSymbol(moduleColor), 0, 0);
+		var secondModuleColor = Settings.colorsForIndex(i)[1];
+		var placed = placeModuleSymbol(createModuleSymbol(moduleColor, secondModuleColor), 0, 0);
 		
 		ModuleManager.addModuleWithKeyAndIndex(i, placed);
 
@@ -154,8 +157,7 @@ function loadSound(paper_id, instance_id)
     	    	sound.analyser = a_ctx.createAnalyser();
     	    	sound.panner = a_ctx.createPanner();
 
-    	    	if(sound.buffer == null)
-		        {
+    	    	if(sound.buffer == null) {
 		        	sound.buffer = buffer;
 		        }
 	
@@ -165,8 +167,13 @@ function loadSound(paper_id, instance_id)
     			sound.analyser.connect(sound.panner);
     			sound.panner.setPosition(0, 0, 0);
     			sound.panner.connect(a_ctx.destination);
-
-    			objects[instance_id].sound = sound;
+				
+				sound.source.onended = function () { removeSound(instance_id); console.log("onended removes sound ", instance_id); };
+				//sound.source.context.ontimeupdate = function (e) { console.log(e); };
+				
+				// In case item is deleted before the MP3 data is loaded
+				if(objects[instance_id] !== undefined)
+    				objects[instance_id].sound = sound;
     			
     	    }, onError);
     	};
@@ -181,16 +188,16 @@ function loadSound(paper_id, instance_id)
     }
     else
     {
-    	console.log("yes:", objects[paper_id]);
+    	if(DEBUG) console.log("yes:", objects[paper_id]);
     }
 }
 
 function startSound(instance_id)
 {
+	if(objects[instance_id] === undefined) return;
 	var obj = objects[instance_id].sound;
 	objects[instance_id].hasStarted = true;
 	var soundLength = obj.source.buffer.duration;
-
 
 	objects[instance_id].degreesPerOptimalFrame = 6/soundLength;
 	obj.source.start(0);
@@ -198,18 +205,17 @@ function startSound(instance_id)
 
 function onError()
 {
-	console.log("Error loading sound ");
+	if(DEBUG) console.log("Error loading sound ");
 }
-
 
 function toggleLoop(e)
 {
-	var id = e.target._id;
-	if(objects[id] !== undefined && objects[id].sound !== undefined)
+	var objectIndex = e.target.objectIndex;
+	if(objects[objectIndex] !== undefined && objects[objectIndex].sound !== undefined)
 	{
-		objects[id].sound.source.loop = !objects[id].sound.source.loop;
-		objects[id].loop = !objects[id].loop;
-		console.log("Set loop to " + objects[id].sound.source.loop + " for object with id " + id);
+		objects[objectIndex].sound.source.loop = !objects[objectIndex].sound.source.loop;
+		objects[objectIndex].loop = !objects[objectIndex].loop;
+		if(DEBUG) console.log("Set loop to " + objects[objectIndex].sound.source.loop + " for object with id " + objectIndex);
 	}
 }
 
@@ -226,10 +232,10 @@ function getXPan(xpos)
 function getYPan(ypos)
 {
 	var y = ypos - 200;
-	var canvasHeight = ch-200;
-	var pan = 1 - (y / canvasHeight);
-	console.log("Pan: ", pan * 10);
-	return pan * 10;
+	var canvasHeight = ch - 200;
+	var pan = 1- (y / canvasHeight);
+	if(DEBUG) console.log("Pan: ", pan * g_attenuation);
+	return pan * g_attenuation;
 }
 
 function getScale(y)
@@ -257,7 +263,7 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));//getYPan(pan.y));//
+		obj.sound.panner.setPosition(2*pan.x - 1, 0, pan.y);//getYPan(pan.y));//
 	}
 }
 
@@ -266,8 +272,10 @@ sched.schedule();
 
 function removeSound(id)
 {	
+	console.log("will remove sound ", id);
 	if(objects[id] !== undefined)
 	{
+		console.log("is not undefined ", id)
 		sched.removeFromBuffer(id);
 		if(objects[id] !== undefined && objects[id].hasStarted == true)
 		{
@@ -280,7 +288,6 @@ function removeSound(id)
 		}
 
 		objects[id].paper.symbol.definition.children = [];
-		objects[id].paper.remove();
 
 		delete objects[id];
 	}
