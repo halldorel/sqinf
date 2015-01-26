@@ -197,16 +197,18 @@ wave.onFrame = function (event)
 
 // Event listeners
 var mouseDown = function (e) {
+	var objectIndex = e.target.objectIndex;
 	if(DEBUG) console.log("mouseDown: ", e.target);
 	pushedElement = e.target;
-	objects[pushedElement.id].isHeld = true;
-	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	objects[pushedElement.objectIndex].isHeld = true;
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 };
 
 var mouseDrag = function (e) {
-	if(pushedElement !== null && objects[pushedElement.id] !== undefined)
+	if(pushedElement !== null && objects[pushedElement.objectIndex] !== undefined)
 	{
-		objects[pushedElement.id].position = e.point;
+		var objectIndex = pushedElement.objectIndex;
+		objects[objectIndex].position = e.point;
 		pushedElement.position = e.point;
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
@@ -228,32 +230,35 @@ var mouseDownModule = function (e) {
 
 	var moduleColor = Settings.colorsForIndex(file_id)[0];
 	var secondColor = Settings.colorsForIndex(file_id)[1];
-
+	
 	pushedElement = placeWaveSymbol(e.point.x, e.point.y, getScale(e.point.y), moduleColor, properties, secondColor);
-	objects[pushedElement.id].isHeld = true;
+	
+	var objectIndex = pushedElement.objectIndex;
+	objects[objectIndex].isHeld = true;
 
-	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
-	loadSound(paper_id, pushedElement.id);
+	loadSound(paper_id, objectIndex);
 };
 
 var mouseUp = function (e) {
+	var objectIndex = pushedElement.objectIndex;
 	if(DEBUG) console.log("mouseUp:", e.target);
 	startActiveObject(true, pushedElement);
 	
 	if(isOffScreen(pushedElement.position))
 	{
-		if(DEBUG) console.log("Removed sound", pushedElement.id)
-		removeSound(pushedElement.id);
+		if(DEBUG) console.log("Removed sound", objectIndex)
+		removeSound(objectIndex);
 		pushedElement = null;
 		return;
 	}
 
-	objects[pushedElement.id].isHeld = false;
-	if(DEBUG) console.log(pushedElement.id, " is held: ", objects[pushedElement.id].isHeld);
+	objects[objectIndex].isHeld = false;
+	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
 	setActiveObjectPan(e);
-	if(DEBUG) console.log(objects[pushedElement.id]);
+	if(DEBUG) console.log(objects[objectIndex]);
 	pushedElement = null;
 };
 
@@ -264,15 +269,16 @@ var doubleClick = function (e) {
 function correctStackingOrder(e)
 {
 	waveCircleLayer.children.sort(function (a, b) {
-		return a.position.y >= b.position.y;
+		return a.position.y - b.position.y;
 	});
 }
 
 function setActiveObjectPan(e) 
 {
+	var objectIndex = pushedElement.objectIndex;
 	if(pushedElement !== null)
 	{
-		changePan(pushedElement.id, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
+		changePan(objectIndex, {x: getXPan(e.point.x), y: getYPan(e.point.y)});
 	}
 }
 
@@ -281,16 +287,16 @@ function startActiveObject(scheduled, object)
 	if(DEBUG) console.log("startActiveObject scheduled:", scheduled, " object:", object);
 	var scheduled = scheduled || false;
 
-	var theId = object.id;
+	var objectIndex = object.objectIndex;
 
-	if (objects[theId].hasStarted === true)
+	if (objects[objectIndex].hasStarted === true)
 		return;
 
 	var startClipNowAndStopTrying = function () {
-		if(DEBUG) console.log(theId, " has started : ", objects[theId].hasStarted);
-		if(scheduled && objects[theId].hasStarted === false)
+		if(DEBUG) console.log(objectIndex, " has started : ", objects[objectIndex].hasStarted);
+		if(scheduled && objects[objectIndex].hasStarted === false)
 		{
-			sched.queue(theId);
+			sched.queue(objectIndex);
 		}
 
 		clearInterval(interval);
@@ -300,7 +306,7 @@ function startActiveObject(scheduled, object)
 	var interval = setInterval( function () {
 		// Try until sound becomes available, then schedule it
 		// and stop trying
-		if(objects[theId] !== undefined && objects[theId].sound !== undefined)
+		if(objects[objectIndex] !== undefined && objects[objectIndex].sound !== undefined)
 		{
 			startClipNowAndStopTrying();
 		}
@@ -309,7 +315,7 @@ function startActiveObject(scheduled, object)
 
 var mouseUpModule = function () {
 	if(DEBUG) console.log("mouseUpModule:", e.target);
-	if(DEBUG) console.log("Starting active object: ", placed.id)
+	if(DEBUG) console.log("Starting active object: ", placed.objectIndex)
 	startActiveObject(true, placed);
 	pushedElement = null;
 };
@@ -338,13 +344,16 @@ function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
 	placed.onDoubleClick = doubleClick;
-	placed.onUpdate = updateWaveCircle;
+	//placed.onUpdate = updateWaveCircle;
 	return placed;
 }
 
+var g_objectIndex = 0;
 function pushObject(paper, properties, clock)
 {
-	objects[paper.id] = {
+	paper.objectIndex = g_objectIndex;
+	
+	objects[g_objectIndex++] = {
 		paper : paper,
 		properties : properties,
 		hasStarted  : false,
@@ -369,11 +378,11 @@ function placeModuleSymbol(moduleSymbol, x, y)
 
 var updateWaveCircle = function (event, paper_obj) {
 	if(paper_obj == null && DEBUG) console.log("paper object null");
-	if(paper_obj.id == null && DEBUG) console.log("paper object id null");
-	var paper_id = paper_obj.id;
-	var obj = objects[paper_id];
-	var sound_obj = objects[paper_id]["sound"];
-	var properties = objects[paper_id]["properties"];
+	if(paper_obj.objectIndex == null && DEBUG) console.log("paper object id null");
+	var objectIndex = paper_obj.objectIndex;
+	var obj = objects[objectIndex];
+	var sound_obj = obj["sound"];
+	var properties = obj["properties"];
 
 	var scale = getScale(obj.paper.position.y);
 
@@ -397,7 +406,7 @@ var updateWaveCircle = function (event, paper_obj) {
 	{
 		obj.sound.fftdata = new Uint8Array(obj.sound.analyser.frequencyBinCount);
 		obj.sound.analyser.getByteFrequencyData(obj.sound.fftdata);
-		obj.sound.source.onended = function () { removeSound(paper_id); };
+		obj.sound.source.onended = function () { removeSound(objectIndex); };
 
 		for(var i = 0; i < res; i++)
 		{

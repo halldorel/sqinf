@@ -6,6 +6,7 @@ var full_path = ''
 var sounds_path = full_path + 'sounds';
 var sampleRate = 44100;
 var pushedElement = null;
+var g_attenuation = 5;
 
 for (var i = 0; i < files.length; ++i)
 {
@@ -206,12 +207,12 @@ function onError()
 
 function toggleLoop(e)
 {
-	var id = e.target._id;
-	if(objects[id] !== undefined && objects[id].sound !== undefined)
+	var objectIndex = e.target.objectIndex;
+	if(objects[objectIndex] !== undefined && objects[objectIndex].sound !== undefined)
 	{
-		objects[id].sound.source.loop = !objects[id].sound.source.loop;
-		objects[id].loop = !objects[id].loop;
-		if(DEBUG) console.log("Set loop to " + objects[id].sound.source.loop + " for object with id " + id);
+		objects[objectIndex].sound.source.loop = !objects[objectIndex].sound.source.loop;
+		objects[objectIndex].loop = !objects[objectIndex].loop;
+		if(DEBUG) console.log("Set loop to " + objects[objectIndex].sound.source.loop + " for object with id " + objectIndex);
 	}
 }
 
@@ -228,10 +229,10 @@ function getXPan(xpos)
 function getYPan(ypos)
 {
 	var y = ypos - 200;
-	var canvasHeight = ch-200;
-	var pan = 1 - (y / canvasHeight);
-	if(DEBUG) console.log("Pan: ", pan * 10);
-	return pan * 10;
+	var canvasHeight = ch - 200;
+	var pan = 1- (y / canvasHeight);
+	if(DEBUG) console.log("Pan: ", pan * g_attenuation);
+	return pan * g_attenuation;
 }
 
 function getScale(y)
@@ -259,7 +260,7 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(2*pan.x - 1, 0, Math.sin(pan.x * Math.PI));//getYPan(pan.y));//
+		obj.sound.panner.setPosition(2*pan.x - 1, 0, pan.y);//getYPan(pan.y));//
 	}
 }
 
