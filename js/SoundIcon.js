@@ -195,6 +195,8 @@ wave.onFrame = function (event)
 	}
 }
 
+var pushedElementOffset = null;
+
 // Event listeners
 var mouseDown = function (e) {
 	var objectIndex = e.target.objectIndex;
@@ -202,14 +204,16 @@ var mouseDown = function (e) {
 	pushedElement = e.target;
 	objects[pushedElement.objectIndex].isHeld = true;
 	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
+  pushedElementOffset = [(e.point.x - e.target.position.x), (e.point.y - e.target.position.y)];
 };
 
 var mouseDrag = function (e) {
 	if(pushedElement !== null && objects[pushedElement.objectIndex] !== undefined)
 	{
 		var objectIndex = pushedElement.objectIndex;
-		objects[objectIndex].position = e.point;
-		pushedElement.position = e.point;
+    var newPos = new paper.Point(e.point.x - pushedElementOffset[0], e.point.y - pushedElementOffset[1]);
+		objects[objectIndex].position = newPos;
+		pushedElement.position = newPos;
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
 	}
@@ -239,6 +243,9 @@ var mouseDownModule = function (e) {
 	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
 	loadSound(paper_id, objectIndex);
+
+  pushedElementOffset = [(e.point.x - e.target.position.x), (e.point.y - e.target.position.y)];
+  console.log(pushedElementOffset);
 };
 
 var mouseUp = function (e) {
@@ -259,6 +266,7 @@ var mouseUp = function (e) {
 
 	setActiveObjectPan(e);
 	if(DEBUG) console.log(objects[objectIndex]);
+  pushedElementOffset = null;
 	pushedElement = null;
 };
 
