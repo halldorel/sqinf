@@ -48,6 +48,13 @@ var files = [
 		"accel" : 0.008
 	},
 	{
+		"name" 	: "Distant Crescendo 1.mp3",
+		"speed" : 40,
+		"color"	: ["#00D6A1", "#CAE1D0"],
+		"amp"	: 10.0,
+		"accel" : 0.008
+	},
+	{
 		"name" 	: "Distant Crescendo 2.mp3",
 		"speed" : 40,
 		"color"	: ["#F4EFA1", "#00D6A1"],
@@ -58,13 +65,6 @@ var files = [
 		"name" 	: "Distant Crescendo 3.mp3",
 		"speed" : 40,
 		"color"	: ["#0000AA", "#E8AE7C"],
-		"amp"	: 10.0,
-		"accel" : 0.008
-	},
-	{
-		"name" 	: "Distant Crescendo.mp3",
-		"speed" : 40,
-		"color"	: ["#00D6A1", "#CAE1D0"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
@@ -196,6 +196,13 @@ var files = [
 		"accel" : 0.008
 	},
 	{
+		"name" 	: "Loud Noise.mp3",
+		"speed" : 60,
+		"color"	: ["#0000AA", "#A0968C"],
+		"amp"	: 20.0,
+		"accel" : 0.020 
+	},
+	{
 		"name"	: "Pizzicato 60 a.mp3",
 		"speed"	: 60,
 		"color"	: ["#AD831E", "#284020"],
@@ -213,13 +220,6 @@ var files = [
 		"name"	: "Pizzicato 60 c.mp3",
 		"speed"	: 60,
 		"color"	: ["#00D6A1", "#AD831E"],
-		"amp"	: 25.0,
-		"accel" : 0.018
-	},
-	{
-		"name"	: "Pizzicato 60 d.mp3",
-		"speed"	: 60,
-		"color"	: ["#E8AE7C", "#F4EFA1"],
 		"amp"	: 25.0,
 		"accel" : 0.018
 	},
@@ -246,7 +246,7 @@ var files = [
 
 	},
 	{
-		"name"	: "PPPP.mp3",
+		"name"	: "Quiet Noise.mp3",
 		"speed"	: 60,
 		"color"	: ["#E2D300", "#A0968C"],
 		"amp"	: 25.0,
@@ -295,13 +295,6 @@ var files = [
 		"accel" : 0.010
 	},
 	{
-		"name"	: "Runa 4.mp3",
-		"speed"	: 60,
-		"color"	: ["#FF4800", "#599C00"],
-		"amp"	: 20.0,
-		"accel" : 0.010
-	},
-	{
 		"name"	: "Wave 1.mp3",
 		"speed"	: 60,
 		"color"	: ["#750002", "#599C00"],
@@ -323,13 +316,6 @@ var files = [
 		"accel" : 0.015
 	},
 /* 90 BPM */
-	{
-		"name" 	: "Creaking Noise.mp3",
-		"speed" : 90,
-		"color"	: ["#0000AA", "#A0968C"],
-		"amp"	: 20.0,
-		"accel" : 0.020 
-	},
 	{	
 		"name" 	: "Harmonic tremolo gliss.mp3",
 		"speed" : 90,
@@ -398,7 +384,7 @@ var Settings = (function()
 
 	var _colorsForIndex = function(index)
 	{
-		if(files[index].color) return orderedColors[index];
+		if(files[index].color) return files[index].color;
 		console.log("Warning: Color index out of bounds.");
 		return "#FF0000";
 	}
