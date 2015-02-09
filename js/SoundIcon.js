@@ -72,43 +72,52 @@ function calculatePerspectiveGridEndpoints()
 	startPoints = [];
 	endPoints = [];
 
-	for (var i = 0; i < numberOfLines; i++)
+	for (var i = 0; i <= numberOfLines; i++)
 	{
 		startPoints.push(new paper.Point(0, 0));
 		endPoints.push(new paper.Point(0, 0));
 	}
 
-	for(var i = 0; i < numberOfLines-1; i++)
+	for(var i = 0; i <= numberOfLines; i++)
 	{
 		//var startX = (i/numberOfLines) * _cw;
 		var startX = 0.5*_cw;
 
-		var endX = (10*i/numberOfLines) * _cw;
-		endX = (endX - 4.5*_cw);
-	
 		startPoints[i].x = startX;
-		startPoints[i].y = 200;
+		startPoints[i].y = 0;
 
-		endPoints[i].x = endX;//*Math.sin(i/numberOfLines*Math.PI);
-		endPoints[i].y = (_ch)*2*Math.sin((1+i)/numberOfLines*Math.PI);
+		endPoints[i].x = Math.max(_cw, _ch) * Math.cos((i)/numberOfLines * Math.PI);
+		endPoints[i].y = Math.max(_cw, _ch) * Math.sin((i)/numberOfLines * Math.PI);
 
-		if (endPoints[i].y < 200)
-		{
-			endPoints[i].y = 200;
-		}
 	}
 }
+
+
+
+var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
+var lineSymbol = new paper.Symbol(line);
+
+var circularDivisions = 10;
+var anglePerDivision = 180 / circularDivisions;
+
+for(var i = 0; i <= circularDivisions; i++) {
+    var placed = lineSymbol.place(new paper.Point(0, 200))
+    
+    placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
+}
+
+line.strokeColor = "#999";
+line.strokeWidth = 1;
 
 function drawPerspectiveGrid()
 {
 	perspectiveGridLayer.activate();
 	linePaths = [];
 	// Draw perspective grid
-	for(var i = 0; i < numberOfLines; i++)
+	for(var i = 0; i <= numberOfLines; i++)
 	{
-		linePaths.push(new paper.Path.Line(startPoints[i], endPoints[i]));
-		linePaths[i].strokeColor = "#999";
-		linePaths[i].strokeWidth = 1;
+		// linePaths[i].strokeColor = "#999";
+//         linePaths[i].strokeWidth = 1;
 	}
 	waveCircleLayer.activate();
 }
@@ -123,10 +132,11 @@ function calculateHorizontalGridEndpoints()
 	startPointsHz = [];
 	endPointsHz = [];
 
-	for(var i = 0; i < numberOfLines; i++)
+	for(var i = 0; i < 16*numberOfLines; i++)
 	{
-		startPointsHz.push(new paper.Point(0, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
-		endPointsHz.push(new paper.Point(cw, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
+        var ypos = 200 + (Math.pow(2/3, i)*ch);
+		startPointsHz.push(new paper.Point(0, ypos));
+		endPointsHz.push(new paper.Point(cw, ypos));
 	}
 }
 
@@ -135,7 +145,7 @@ function drawHorizontalLines()
 	perspectiveGridLayer.activate();
 	linePathsHz = [];
 
-	for(var i = 0; i < numberOfLines/2; i++)
+	for(var i = 0; i < numberOfLines*16; i++)
 	{
 		linePathsHz.push(new paper.Path.Line(startPointsHz[i], endPointsHz[i]));
 		linePathsHz[i].strokeColor = "#999";
