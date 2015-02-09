@@ -97,14 +97,14 @@ function calculatePerspectiveGridEndpoints()
 var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
 var lineSymbol = new paper.Symbol(line);
 
-var circularDivisions = 180;
+var circularDivisions = 48;
 var anglePerDivision = 45;
 //var anglePerDivision = 180 / circularDivisions;
 
 for(var i = 0; i <= circularDivisions; i++) {
     var placed = lineSymbol.place(new paper.Point(0, 200))
     
-    placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*58, new paper.Point(_cw/2, 200)); 
+    placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*60, new paper.Point(_cw/2, 200)); 
     
     // placed.rotate(-2*anglePerDivision * Math.pow(2/3, i), new paper.Point(_cw/2, 200));
     // placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
@@ -136,9 +136,9 @@ function calculateHorizontalGridEndpoints()
 	startPointsHz = [];
 	endPointsHz = [];
 
-	for(var i = 0; i < 16*numberOfLines; i++)
+	for(var i = 0; i < numberOfLines; i++)
 	{
-        var ypos = 200 + (Math.pow(2/3, i)*ch);
+        var ypos =  199 + (Math.pow(2/3, i)*ch);
 		startPointsHz.push(new paper.Point(0, ypos));
 		endPointsHz.push(new paper.Point(cw, ypos));
 	}
