@@ -97,13 +97,17 @@ function calculatePerspectiveGridEndpoints()
 var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
 var lineSymbol = new paper.Symbol(line);
 
-var circularDivisions = 10;
-var anglePerDivision = 180 / circularDivisions;
+var circularDivisions = 180;
+var anglePerDivision = 45;
+//var anglePerDivision = 180 / circularDivisions;
 
 for(var i = 0; i <= circularDivisions; i++) {
     var placed = lineSymbol.place(new paper.Point(0, 200))
     
-    placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
+    placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*58, new paper.Point(_cw/2, 200)); 
+    
+    // placed.rotate(-2*anglePerDivision * Math.pow(2/3, i), new paper.Point(_cw/2, 200));
+    // placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
 }
 
 line.strokeColor = "#999";
@@ -116,8 +120,8 @@ function drawPerspectiveGrid()
 	// Draw perspective grid
 	for(var i = 0; i <= numberOfLines; i++)
 	{
-		// linePaths[i].strokeColor = "#999";
-//         linePaths[i].strokeWidth = 1;
+		 //linePaths[i].strokeColor = "#999";
+         //linePaths[i].strokeWidth = 1;
 	}
 	waveCircleLayer.activate();
 }
