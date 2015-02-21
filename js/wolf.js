@@ -165,7 +165,7 @@ function loadSound(paper_id, instance_id)
     			sound.source.buffer = sound.buffer;
     			sound.source.connect(sound.analyser);
     			sound.analyser.connect(sound.panner);
-    			sound.panner.setPosition(0, 0, 0);
+    			sound.panner.setPosition(0, 0, 1);
     			sound.panner.connect(a_ctx.destination);
 				
 				sound.source.onended = function () { removeSound(instance_id); console.log("onended removes sound ", instance_id); };

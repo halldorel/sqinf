@@ -52,6 +52,8 @@ function clock(x, y, r, speed, secondColor, firstColor)
         delete path;
         return segments;
     }
+    
+    var zeroPoint = new paper.Point(0, 0);
 
     var updateClock = function(speed, isInfinite) 
     {
@@ -69,13 +71,12 @@ function clock(x, y, r, speed, secondColor, firstColor)
 		
         if(isInfinite)
         {
-            pie.segments = generatePieSegmentsForAngle(180, alter);
-            pie.matrix.rotation = degrees;
+            pie.segments = generatePieSegmentsForAngle(-180, alter);
+            pie.rotate(degrees, zeroPoint);
         }
         else
         {
             pie.segments = generatePieSegmentsForAngle(degrees, alter);
-            pie.matrix.rotation = 0;
         }
     }
 	

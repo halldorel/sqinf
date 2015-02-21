@@ -6,6 +6,8 @@ var ampConstDefault = 10.0;
 var pointAccelConstDefault = 0.010;
 var pointCounter = 0;
 var wavCount = 0;
+var whiteBackground = new paper.Path.Rectangle(new paper.Point(0, 0), new paper.Point(4000, 200));
+whiteBackground.fillColor = 'white';
 
 var wave = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 0),
@@ -18,6 +20,7 @@ var waveCircle = new paper.Path({
 	strokeWidth: 0,
 	strokeCap: 'square'
 });
+
 
 var clockPath = new paper.Path({
 	strokeColor: new paper.Color(0, 0, 0, 1),
@@ -92,44 +95,30 @@ function calculatePerspectiveGridEndpoints()
 	}
 }
 
-
-
-var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
-var lineSymbol = new paper.Symbol(line);
-
-var circularDivisions = 48;
-var anglePerDivision = 45;
-//var anglePerDivision = 180 / circularDivisions;
-
-for(var i = 0; i <= circularDivisions; i++) {
-    var placed = lineSymbol.place(new paper.Point(0, 200))
-    
-    placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*60, new paper.Point(_cw/2, 200)); 
-    
-    // placed.rotate(-2*anglePerDivision * Math.pow(2/3, i), new paper.Point(_cw/2, 200));
-    // placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
-}
-
-line.strokeColor = "#999";
-line.strokeWidth = 1;
-
-function drawPerspectiveGrid()
-{
-	perspectiveGridLayer.activate();
-	linePaths = [];
-	// Draw perspective grid
-	for(var i = 0; i <= numberOfLines; i++)
-	{
-		 //linePaths[i].strokeColor = "#999";
-         //linePaths[i].strokeWidth = 1;
-	}
-	waveCircleLayer.activate();
-}
-
 var startPointsHz = [];
 var endPointsHz = [];
 
 var linePathsHz = [];
+
+function drawPerspectiveGrid()
+{
+    var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
+    var lineSymbol = new paper.Symbol(line);
+    
+    line.strokeColor = "#999";
+    line.strokeWidth = 1;
+
+	perspectiveGridLayer.activate();
+    var circularDivisions = 48;
+    var anglePerDivision = 45;
+
+    for(var i = 0; i <= circularDivisions; i++) {
+        var placed = lineSymbol.place(new paper.Point(0, 200))
+        placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*60, new paper.Point(_cw/2, 200));
+        linePaths.push(placed);
+    }
+	waveCircleLayer.activate();
+}
 
 function calculateHorizontalGridEndpoints()
 {
@@ -280,7 +269,7 @@ var mouseUp = function (e) {
 
 	setActiveObjectPan(e);
 	if(DEBUG) console.log(objects[objectIndex]);
-  pushedElementOffset = null;
+    pushedElementOffset = null;
 	pushedElement = null;
 };
 
@@ -335,13 +324,6 @@ function startActiveObject(scheduled, object)
 	}, 1000);
 }
 
-var mouseUpModule = function () {
-	/*if(DEBUG) console.log("mouseUpModule:", e.target);
-	if(DEBUG) console.log("Starting active object: ", placed.objectIndex)
-	//startActiveObject(true, placed);
-	pushedElement = null;*/
-};
-
 // Helper functions
 function waveFunc (x) {
 	return (40 + (20 * Math.sin(x * 2 * Math.PI)));
@@ -353,20 +335,20 @@ function placeWaveSymbol(x, y, scale, color, properties, secondColor)
 	color = color || 'rgb(120, 120, 120)';
 	secondColor = secondColor || 'rgb(120, 0, 0)';
 	properties = properties | {};
+    
 	var placed = waveCircleSymbol.clone().place(new paper.Point(x, y));
 	var hvadErKlukkan = clock(0, 0, g_r, 1, color, secondColor);
+    
 	placed.symbol.definition.children[1] = hvadErKlukkan[0];
-	//placed.symbol.definition.children[0].clipMask = true;
 	placed.symbol.definition._clipItem = placed.symbol.definition.children[0];
 	hvadErKlukkan[0].remove();
-//debugger;
-	//placed.symbol.definition.clipped = true;
+    
 	pushObject(placed, properties, hvadErKlukkan);
+    
 	placed.onMouseDown = mouseDown;
 	placed.onMouseDrag = mouseDrag;
 	placed.onMouseUp = mouseUp;
 	placed.onDoubleClick = doubleClick;
-	//placed.onUpdate = updateWaveCircle;
 	return placed;
 }
 
@@ -395,7 +377,6 @@ function placeModuleSymbol(moduleSymbol, x, y)
 	var placed = moduleSymbol.place(new paper.Point(x, y));
 	placed.onMouseDown = mouseDownModule;
 	placed.onMouseDrag = mouseDrag;
-	placed.onMouseUp = mouseUpModule;
 	return placed;
 }
 
@@ -411,12 +392,7 @@ var updateWaveCircle = function (event, paper_obj) {
 
 	obj.paper.matrix.scaleX = scale;
 	obj.paper.matrix.scaleY = scale;
-/*
-	obj.paper.symbol.definition.matrix.scaleX = scale;
-	obj.paper.symbol.definition.matrix.scaleY = scale;
-*/
-	//obj.paper.selected = true;
-
+    
 	var amp = properties.amp ? properties.amp : ampConstDefault;
 	var pointAccelConst = properties.accel ? properties.accel : pointAccelConstDefault;
 
