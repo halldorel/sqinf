@@ -72,43 +72,56 @@ function calculatePerspectiveGridEndpoints()
 	startPoints = [];
 	endPoints = [];
 
-	for (var i = 0; i < numberOfLines; i++)
+	for (var i = 0; i <= numberOfLines; i++)
 	{
 		startPoints.push(new paper.Point(0, 0));
 		endPoints.push(new paper.Point(0, 0));
 	}
 
-	for(var i = 0; i < numberOfLines-1; i++)
+	for(var i = 0; i <= numberOfLines; i++)
 	{
 		//var startX = (i/numberOfLines) * _cw;
 		var startX = 0.5*_cw;
 
-		var endX = (10*i/numberOfLines) * _cw;
-		endX = (endX - 4.5*_cw);
-	
 		startPoints[i].x = startX;
-		startPoints[i].y = 200;
+		startPoints[i].y = 0;
 
-		endPoints[i].x = endX;//*Math.sin(i/numberOfLines*Math.PI);
-		endPoints[i].y = (_ch)*2*Math.sin((1+i)/numberOfLines*Math.PI);
+		endPoints[i].x = Math.max(_cw, _ch) * Math.cos((i)/numberOfLines * Math.PI);
+		endPoints[i].y = Math.max(_cw, _ch) * Math.sin((i)/numberOfLines * Math.PI);
 
-		if (endPoints[i].y < 200)
-		{
-			endPoints[i].y = 200;
-		}
 	}
 }
+
+
+
+var line = new paper.Path.Line(new paper.Point(-_cw/2, 200), new paper.Point(_cw/2, 200));
+var lineSymbol = new paper.Symbol(line);
+
+var circularDivisions = 48;
+var anglePerDivision = 45;
+//var anglePerDivision = 180 / circularDivisions;
+
+for(var i = 0; i <= circularDivisions; i++) {
+    var placed = lineSymbol.place(new paper.Point(0, 200))
+    
+    placed.rotate(-90 + Math.atan((i/2 - (circularDivisions/4)))*60, new paper.Point(_cw/2, 200)); 
+    
+    // placed.rotate(-2*anglePerDivision * Math.pow(2/3, i), new paper.Point(_cw/2, 200));
+    // placed.rotate(-i*anglePerDivision, new paper.Point(_cw/2, 200));
+}
+
+line.strokeColor = "#999";
+line.strokeWidth = 1;
 
 function drawPerspectiveGrid()
 {
 	perspectiveGridLayer.activate();
 	linePaths = [];
 	// Draw perspective grid
-	for(var i = 0; i < numberOfLines; i++)
+	for(var i = 0; i <= numberOfLines; i++)
 	{
-		linePaths.push(new paper.Path.Line(startPoints[i], endPoints[i]));
-		linePaths[i].strokeColor = "#999";
-		linePaths[i].strokeWidth = 1;
+		 //linePaths[i].strokeColor = "#999";
+         //linePaths[i].strokeWidth = 1;
 	}
 	waveCircleLayer.activate();
 }
@@ -125,8 +138,9 @@ function calculateHorizontalGridEndpoints()
 
 	for(var i = 0; i < numberOfLines; i++)
 	{
-		startPointsHz.push(new paper.Point(0, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
-		endPointsHz.push(new paper.Point(cw, (200 + 3*(Math.pow(i/numberOfLines, 2)*(_ch)))));
+        var ypos =  199 + (Math.pow(2/3, i)*ch);
+		startPointsHz.push(new paper.Point(0, ypos));
+		endPointsHz.push(new paper.Point(cw, ypos));
 	}
 }
 
@@ -135,7 +149,7 @@ function drawHorizontalLines()
 	perspectiveGridLayer.activate();
 	linePathsHz = [];
 
-	for(var i = 0; i < numberOfLines/2; i++)
+	for(var i = 0; i < numberOfLines*16; i++)
 	{
 		linePathsHz.push(new paper.Path.Line(startPointsHz[i], endPointsHz[i]));
 		linePathsHz[i].strokeColor = "#999";
@@ -195,6 +209,8 @@ wave.onFrame = function (event)
 	}
 }
 
+var pushedElementOffset = null;
+
 // Event listeners
 var mouseDown = function (e) {
 	var objectIndex = e.target.objectIndex;
@@ -202,14 +218,16 @@ var mouseDown = function (e) {
 	pushedElement = e.target;
 	objects[pushedElement.objectIndex].isHeld = true;
 	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
+  pushedElementOffset = [(e.point.x - e.target.position.x), (e.point.y - e.target.position.y)];
 };
 
 var mouseDrag = function (e) {
 	if(pushedElement !== null && objects[pushedElement.objectIndex] !== undefined)
 	{
 		var objectIndex = pushedElement.objectIndex;
-		objects[objectIndex].position = e.point;
-		pushedElement.position = e.point;
+    var newPos = new paper.Point(e.point.x - pushedElementOffset[0], e.point.y - pushedElementOffset[1]);
+		objects[objectIndex].position = newPos;
+		pushedElement.position = newPos;
 		correctStackingOrder(e)
 		setActiveObjectPan(e);
 	}
@@ -239,6 +257,9 @@ var mouseDownModule = function (e) {
 	if(DEBUG) console.log(objectIndex, " is held: ", objects[objectIndex].isHeld);
 
 	loadSound(paper_id, objectIndex);
+
+  pushedElementOffset = [(e.point.x - e.target.position.x), (e.point.y - e.target.position.y)];
+  console.log(pushedElementOffset);
 };
 
 var mouseUp = function (e) {
@@ -259,6 +280,7 @@ var mouseUp = function (e) {
 
 	setActiveObjectPan(e);
 	if(DEBUG) console.log(objects[objectIndex]);
+  pushedElementOffset = null;
 	pushedElement = null;
 };
 

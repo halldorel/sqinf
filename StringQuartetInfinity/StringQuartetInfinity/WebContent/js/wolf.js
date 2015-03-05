@@ -263,7 +263,7 @@ function changePan(id, pan)
 
 	if(obj.sound !== undefined)
 	{
-		obj.sound.panner.setPosition(2*pan.x - 1, 0, pan.y);//getYPan(pan.y));//
+		obj.sound.panner.setPosition(6*pan.x - 3, 0, pan.y)//pan.y * pan.x/10);
 	}
 }
 

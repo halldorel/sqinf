@@ -15,126 +15,126 @@ var files = [
 	{
 		"name" 	: "Bouncing.mp3",
 		"speed" : 40,
-		"color"	: ["#E2D300", "#0000AA"],
+		"color"	: ["#ffb834", "#bf3100"],
 		"amp"	: 25.0,
 		"accel" : 0.030
 	},
 	{
 		"name" 	: "Cello Portamento.mp3",
 		"speed" : 40,
-		"color"	: ["#284020", "#FF4800"],
+		"color"	: ["#00400a", "#008015"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Cello Reverse 1.mp3",
 		"speed" : 40,
-		"color"	: ["#A0968C", "#FF4800"],
+		"color"	: ["#800036", "#ff4200"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Cello Reverse 2.mp3",
 		"speed" : 40,
-		"color"	: ["#0000AA", "#FF4800"],
+		"color"	: ["#800036", "#929497"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Cello Reverse 3.mp3",
 		"speed" : 40,
-		"color"	: ["#00D6A1", "#FF4800"],
+		"color"	: ["#800036", "#ac7c23"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Distant Crescendo 1.mp3",
 		"speed" : 40,
-		"color"	: ["#00D6A1", "#CAE1D0"],
+		"color"	: ["#008015", "#00c3a1"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Distant Crescendo 2.mp3",
 		"speed" : 40,
-		"color"	: ["#F4EFA1", "#00D6A1"],
+		"color"	: ["#008015", "#ffa180"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Distant Crescendo 3.mp3",
 		"speed" : 40,
-		"color"	: ["#0000AA", "#E8AE7C"],
+		"color"	: ["#008015", "#00bf1f"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Distant Harmonics 1.mp3",
 		"speed" : 40,
-		"color"	: ["#F4EFA1", "#599C00"],
+		"color"	: ["#00ffd3", "#0026ff"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Distant Harmonics 2.mp3",
 		"speed" : 40,
-		"color"	: ["#E2D300", "#CAE1D0"],
+		"color"	: ["#00ffd3", "#f1f1f2"],
 		"amp"	: 9.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Doppler Effect.mp3",
 		"speed" : 40,
-		"color"	: ["#960049", "#353017"],
+		"color"	: ["#590026", "#ffa180"],
 		"amp"	: 20.0,
 		"accel" : 0.030
 	},
 	{
 		"name" 	: "Passing Trains.mp3",
 		"speed" : 40,
-		"color"	: ["#CAE1D0", "#0000AA"],
+		"color"	: ["#ac7c23", "#a6a8ab"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Slow Crescendo 1.mp3",
 		"speed" : 40,
-		"color"	: ["#E2D300", "#FF4800"],
+		"color"	: ["#ff4200", "#0026ff"],
 		"amp"	: 10.0,
 		"accel" : 0.012
 	},
 	{
 		"name" 	: "Slow Crescendo 2.mp3",
 		"speed" : 40,
-		"color"	: ["#FF4800", "#AD831E"],
+		"color"	: ["#ff4200", "#00ffd3"],
 		"amp"	: 10.0,
 		"accel" : 0.013
 	},
 	{
 		"name" 	: "Slow Crescendo 3.mp3",
 		"speed" : 40,
-		"color"	: ["#AD831E", "#E2D300"],
+		"color"	: ["#ff4200", "#00bf1f"],
 		"amp"	: 10.0,
 		"accel" : 0.010
 	},
 	{
 		"name" 	: "Slow Pizzicato 1.mp3",
 		"speed" : 40,
-		"color"	: ["#284020", "#A0968C"],
+		"color"	: ["#929497", "#bf0051"],
 		"amp"	: 40.0,
 		"accel" : 0.010
 	},
 	{
 		"name" 	: "Slow Pizzicato 2.mp3",
 		"speed" : 40,
-		"color"	: ["#284020", "#EBB770"],
+		"color"	: ["#929497", "#0026ff"],
 		"amp"	: 40.0,
 		"accel" : 0.010
 	},
 	{
 		"name" 	: "Slow Pizzicato 3.mp3",
 		"speed" : 40,
-		"color"	: ["#A0968C", "#AD831E"],
+		"color"	: ["#929497", "#00c3a1"],
 		"amp"	: 40.0,
 		"accel" : 0.013
 	},
@@ -142,105 +142,112 @@ var files = [
 	{
 		"name"	: "Canon.mp3",
 		"speed"	: 60,
-		"color"	: ["#E8AE7C", "#00D6A1"],
+		"color"	: ["#00bf1f", "#bf3100"],
 		"amp"	: 10.0,
 		"accel" : 0.0075
 	},
 	{
 		"name"	: "Cluster Attacks.mp3",
 		"speed"	: 60,
-		"color"	: ["#E2D300", "#960049"],
+		"color"	: ["#00bf1f", "#2bcdff"],
 		"amp"	: 20.0,
 		"accel" : 0.018
 	},
 	{
 		"name"	: "Cluster Bright.mp3",
 		"speed"	: 60,
-		"color"	: ["#E2D300", "#00D6A1"],
+		"color"	: ["#00bf1f", "#0018a3"],
 		"amp"	: 20.0,
 		"accel" : 0.018
 	},
 	{
 		"name"	: "Cluster Crescendo.mp3",
 		"speed"	: 60,
-		"color"	: ["#FF4800", "#750002"],
+		"color"	: ["#0026ff", "#ffb834"],
 		"amp"	: 20.0,
 		"accel" : 0.018
 	},
 	{
 		"name"	: "Cluster Mid.mp3",
 		"speed"	: 60,
-		"color"	: ["#AD831E", "#CAE1D0"],
+		"color"	: ["#ffa180", "#f1f1f2"],
 		"amp"	: 30.0,
 		"accel" : 0.020
 	},
 	{
 		"name"	: "Cluster Pulse.mp3",
 		"speed"	: 60,
-		"color"	: ["#750002", "#284020"],
+		"color"	: ["#ffa180", "#a6a8ab"],
 		"amp"	: 30.0,
 		"accel" : 0.020
 	},
 	{
 		"name"	: "Harmonic Chain 1.mp3",
 		"speed"	: 60,
-		"color"	: ["#CAE1D0", "#A0968C"],
+		"color"	: ["#ffa180", "#6d6e70"],
 		"amp"	: 10.0,
 		"accel" : 0.008
 	},
 	{
 		"name"	: "Harmonic Chain 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#AD831E", "#CAE1D0"],
+		"color"	: ["#ffa180", "#404041"],
 		"amp"	: 15.0,
 		"accel" : 0.008
 	},
 	{
 		"name" 	: "Loud Noise.mp3",
 		"speed" : 60,
-		"color"	: ["#0000AA", "#A0968C"],
+		"color"	: ["#ffa180", "#0018a3"],
 		"amp"	: 20.0,
 		"accel" : 0.020 
 	},
 	{
 		"name"	: "Pizzicato 60 a.mp3",
 		"speed"	: 60,
-		"color"	: ["#AD831E", "#284020"],
+		"color"	: ["#f1f1f2", "#800036"],
 		"amp"	: 25.0,
 		"accel" : 0.018
 	},
 	{
 		"name"	: "Pizzicato 60 b.mp3",
 		"speed"	: 60,
-		"color"	: ["#E8AE7C", "#284020"],
+		"color"	: ["#f1f1f2", "#ff4200"],
 		"amp"	: 25.0,
 		"accel" : 0.018
 	},
 	{
 		"name"	: "Pizzicato 60 c.mp3",
 		"speed"	: 60,
-		"color"	: ["#00D6A1", "#AD831E"],
+		"color"	: ["#bf0051", "#ac7c23"],
 		"amp"	: 25.0,
 		"accel" : 0.018
 	},
 	{
+		"name"	: "PPPP.mp3",
+		"speed"	: 60,
+		"color"	: ["#6d6e70", "#008015"],
+		"amp"	: 20.0,
+		"accel" : 0.006
+	},
+	{
 		"name"	: "PPPP 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#960049", "#AD831E"],
+		"color"	: ["#6d6e70", "#00bf1f"],
 		"amp"	: 20.0,
 		"accel" : 0.006
 	},
 	{
 		"name"	: "PPPP Portamento 1.mp3",
 		"speed"	: 60,
-		"color"	: ["#599C00", "#960049"],
+		"color"	: ["#6d6e70", "#00ffd3"],
 		"amp"	: 25.0,
 		"accel" : 0.010
 	},
 	{
 		"name"	: "PPPP Portamento 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#CAE1D0", "#AD831E"],
+		"color"	: ["#6d6e70", "#bf3100"],
 		"amp"	: 25.0,
 		"accel" : 0.010
 
@@ -248,70 +255,70 @@ var files = [
 	{
 		"name"	: "Quiet Noise.mp3",
 		"speed"	: 60,
-		"color"	: ["#E2D300", "#A0968C"],
+		"color"	: ["#404041", "#ff4200"],
 		"amp"	: 25.0,
 		"accel" : 0.010
 	},
 	{
 		"name"	: "Romantik 1.mp3",
 		"speed"	: 60,
-		"color"	: ["#CAE1D0", "#FF4800"],
+		"color"	: ["#bf3100", "#0018a3"],
 		"amp"	: 25.0,
 		"accel" : 0.020
 	},
 	{
 		"name"	: "Romantik 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#FF4800", "#960049"],
+		"color"	: ["#bf3100", "#008015"],
 		"amp"	: 25.0,
 		"accel" : 0.020
 	},
 	{
 		"name"	: "Romantik 3.mp3",
 		"speed"	: 60,
-		"color"	: ["#960049", "#323031"],
+		"color"	: ["#bf3100", "#ffa180"],
 		"amp"	: 25.0,
 		"accel" : 0.020
 	},
 	{
 		"name"	: "Runa 1.mp3",
 		"speed"	: 60,
-		"color"	: ["#0000AA", "#284020"],
+		"color"	: ["#0018a3", "#ac7c23"],
 		"amp"	: 20.0,
 		"accel" : 0.010
 	},
 	{
 		"name"	: "Runa 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#00D6A1", "#0000AA"],
+		"color"	: ["#0018a3", "#2bcdff"],
 		"amp"	: 20.0,
 		"accel" : 0.010
 	},
 	{
 		"name"	: "Runa 3.mp3",
 		"speed"	: 60,
-		"color"	: ["#00D6A1", "#960049"],
+		"color"	: ["#0018a3", "#f1f1f2"],
 		"amp"	: 20.0,
 		"accel" : 0.010
 	},
 	{
 		"name"	: "Wave 1.mp3",
 		"speed"	: 60,
-		"color"	: ["#750002", "#599C00"],
+		"color"	: ["#805300", "#ffb834"],
 		"amp"	: 15.0,
 		"accel" : 0.015
 	},
 	{
 		"name"	: "Wave 2.mp3",
 		"speed"	: 60,
-		"color"	: ["#E8AE7C", "#750002"],
+		"color"	: ["#805300", "#590026"],
 		"amp"	: 15.0,
 		"accel" : 0.015
 	},
 	{
 		"name"	: "Wave 3.mp3",
 		"speed"	: 60,
-		"color"	: ["#750002", "#AD831E"],
+		"color"	: ["#805300", "#bf3100"],
 		"amp"	: 15.0,
 		"accel" : 0.015
 	},
@@ -319,56 +326,56 @@ var files = [
 	{	
 		"name" 	: "Harmonic tremolo gliss.mp3",
 		"speed" : 90,
-		"color"	: ["#F4EFA1", "#CAE1D0"],
+		"color"	: ["#00c3a1", "#ffa180"],
 		"amp"	: 20.0,
 		"accel" : 0.020  
 	},
 	{
 		"name" 	: "Pizzicato 1.mp3",
 		"speed" : 90,
-		"color"	: ["#E2D300", "#E8AE7C"],
+		"color"	: ["#2bcdff", "#ffb834"],
 		"amp"	: 25.0,
 		"accel" : 0.020 
 	},
 	{		
 		"name" 	: "Pizzicato 2.mp3",
 		"speed" : 90,
-		"color"	: ["#E8AE7C", "#A0968C"],
+		"color"	: ["#2bcdff", "#00ffd3"],
 		"amp"	: 25.0,
 		"accel" : 0.020 
 	},
 	{		
 		"name" 	: "Pump.mp3",
 		"speed" : 90,
-		"color"	: ["#A0968C", "#00D6A1"],
+		"color"	: ["#008870", "#ff4200"],
 		"amp"	: 30.0,
 		"accel" : 0.018 
 	},
 	{		
 		"name" 	: "Ricochet 1.mp3",
 		"speed" : 90,
-		"color"	: ["#E2D300", "#284020"],
+		"color"	: ["#a6a8ab", "#00ffd3"],
 		"amp"	: 35.0,
 		"accel" : 0.022 
 	},
 	{		
 		"name" 	: "Ricochet 2.mp3",
 		"speed" : 90,
-		"color"	: ["#CAE1D0", "#750002"],
+		"color"	: ["#a6a8ab", "#ffb834"],
 		"amp"	: 35.0,
 		"accel" : 0.022
 	},
 	{		
 		"name" 	: "Ricochet 3.mp3",
 		"speed" : 90,
-		"color"	: ["#599C00", "#A0968C"],
+		"color"	: ["#a6a8ab", "#ffa180"],
 		"amp"	: 35.0,
 		"accel" : 0.022
 	},
 	{		
 		"name" 	: "Ricochet 4.mp3",
 		"speed" : 90,
-		"color"	: ["#AD831E", "#E8AE7C"],
+		"color"	: ["#a6a8ab", "#ac7c23"],
 		"amp"	: 35.0,
 		"accel" : 0.022
 	}
