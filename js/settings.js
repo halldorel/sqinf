@@ -253,7 +253,7 @@ var files = [
 
 	},
 	{
-		"name"	: "Quiet Noise.mp3",
+		"name"	: "Creaking Noise.mp3",
 		"speed"	: 60,
 		"color"	: ["#404041", "#ff4200"],
 		"amp"	: 25.0,
