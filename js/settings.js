@@ -253,13 +253,6 @@ var files = [
 
 	},
 	{
-		"name"	: "Creaking Noise.mp3",
-		"speed"	: 60,
-		"color"	: ["#404041", "#ff4200"],
-		"amp"	: 25.0,
-		"accel" : 0.010
-	},
-	{
 		"name"	: "Romantik 1.mp3",
 		"speed"	: 60,
 		"color"	: ["#bf3100", "#0018a3"],
@@ -323,6 +316,13 @@ var files = [
 		"accel" : 0.015
 	},
 /* 90 BPM */
+	{
+		"name"	: "Creaking Noise.mp3",
+		"speed"	: 90,
+		"color"	: ["#404041", "#ff4200"],
+		"amp"	: 25.0,
+		"accel" : 0.010
+	},
 	{	
 		"name" 	: "Harmonic tremolo gliss.mp3",
 		"speed" : 90,
