@@ -10,12 +10,59 @@
         <meta property="og:image" content="img/sqinf.png" />
 	</head>
 	<body>
+    <a href="" id="show-info">Info</a>
+<div id="info" class="hide">
+  
+  <a href="" id="close">[close]</a>
+  <p>
+      Music by: Úlfur Eldjárn<br/>
+    
+      Graphic designer Sigurður Oddsson<br/>
+      Programming by: Halldór Eldjárn.
+    </p>
+<p>
+      Music performed by: Una Sveinbjarnardóttir (violin), Pálína Árnadóttir (violin), Guðrún Hrund Harðardóttir (viola) and Hrafnkell Orri Egilsson (cello).<br />
+      Strings recorded and mixed by Styrmir Hauksson at Guðríðarkirkja, Reykjavík Iceland. 2013-2015.<br />
+      © Úlfur Eldjárn 2015. <br />
+      <a href="http://www.ulfureldjarn.com">www.ulfureldjarn.com</a>
+    </p>
+<p>
+      The project was funded by the Icelandic Music Fund and through Karolina Fund crowdfunding www.karolinafund.com - Special thanks to all those who donated. You will be remembered forever.</p>
+<p>
+      ——————————
+</p><p>
+      The Infinite String Quartet works best on a desktop web browser.<br />
+      For optimal viewing experience please use the Apple Safari browser.
+      <br />
+      The quartet runs on the user's browser in real-time. It is written entirely in JavaScript and the rendering is done with Paper.js on the HTML5 canvas.
+</p><p>
+      ———————————
+</p>
+<p>
+      Press material + all other inquiries contact  <a href="mailto:ulfur.eldjarn@gmail.com">ulfur.eldjarn@gmail.com</a></p>
+    </div>
 		<ul id="modules"></ul>
 
 		<div id="canvas-wrap">
 			<canvas id="scope" width="" height="" resize="true"></canvas>
 		</div>
-
+    <script>
+    var info = document.getElementById("show-info");
+    var infoBox = document.getElementById("info");
+    var closeButton = document.getElementById("close");
+    
+    info.addEventListener('click', function(e) {
+      e.preventDefault();
+      infoBox.className = "";
+    });
+    
+    closeButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      infoBox.className = "hide";
+    });
+    
+    
+    </script>
 		<script src="js/settings.js"></script>
 		<script src="js/paper.js"></script>
 		<script src="js/ModuleManager.js"></script>

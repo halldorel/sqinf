@@ -1,4 +1,39 @@
 /* Hacks */
+
+#show-info
+{
+    position: absolute;
+    display: block;
+    bottom: 0px;
+    right: 0px;
+    font-size: 8px;
+}
+
+#show-info a {
+    color: #ccc;
+}
+
+#info {
+    padding: 20px;
+    font-size: 12px;
+    width: 70%;
+    height: 80%;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: #ececec;
+    margin: auto;
+    border: 1px solid #ccc;
+    overflow: scroll;
+}
+
+.hide {
+    display: none !important;
+}
+
 [draggable] {
   -moz-user-select: none;
   -khtml-user-select: none;
