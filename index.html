@@ -7,18 +7,36 @@
         <meta property="og:title" content="Infinite String Quartet" />
         <meta property="og:description" content="Infinite String Quartet by composer Úlfur Eldjárn. Design by Sigurður Oddsson and programming by Halldór Eldjárn" />
         <meta property="og:url" content="http://infinitestringquartet.com" />
-        <meta property="og:image" content="img/sqinf.png" />
+        <meta property="og:image" content="http://infinitestringquartet.com/img/sqinf.png" />
 	</head>
 	<body>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '467002200115504',
+      xfbml      : true,
+      version    : 'v2.2'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
     <a href="" id="show-info">Info</a>
 <div id="info" class="hide">
   
   <a href="" id="close">[close]</a>
+  <div class="fb-like" data-href="http://infinitestringquartet.com" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
   <p>
-      Music by: Úlfur Eldjárn<br/>
+      Music by: <a href="http://ulfureldjarn.com">Úlfur Eldjárn</a><br/>
     
-      Graphic designer Sigurður Oddsson<br/>
-      Programming by: Halldór Eldjárn.
+      Graphic designer <a href="http://siggiodds.com">Sigurður Oddsson</a><br/>
+      Programming by: <a href="http://github.com/halldorel">Halldór Eldjárn</a>.
     </p>
 <p>
       Music performed by: Una Sveinbjarnardóttir (violin), Pálína Árnadóttir (violin), Guðrún Hrund Harðardóttir (viola) and Hrafnkell Orri Egilsson (cello).<br />
